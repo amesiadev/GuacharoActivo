@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Analítico MHE - Guácharo Activo (00-75)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 900: '#064e3b' },
+                        dark: { 950: '#070a0f', 900: '#0b0f17', 800: '#111827', 700: '#1f2937', 600: '#374151' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #070a0f; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-emerald { box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f17; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        .tab-btn.active { background-color: #10b981; color: #070a0f; font-weight: 700; box-shadow: 0 0 10px rgba(16,185,129,0.4); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="border-b border-gray-800 bg-dark-900/90 sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-dark-950 font-black text-xl shadow-lg glow-emerald">
+                    G
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg text-white tracking-wide flex items-center gap-2">
+                        GUÁCHARO MHE <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">00-75 PRO</span>
+                    </h1>
+                    <p class="text-[11px] text-gray-400">Motor Híbrido Estocástico (77 Nodos Completo)</p>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex items-center space-x-4 text-xs font-mono">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-gray-300">Base: <strong id="global-sample-count" class="text-emerald-400">0</strong> sorteos</span>
+                </div>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-400">Acierto W30:</span>
+                    <span id="global-win-rate" class="text-emerald-400 font-bold">0%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN POR PESTAÑAS -->
+    <div class="border-b border-gray-800 bg-dark-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 overflow-x-auto py-2">
+            <button onclick="switchTab('tab-prediction')" id="btn-tab-prediction" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-crosshairs"></i> Pronóstico & Control Diario
+            </button>
+            <button onclick="switchTab('tab-markov')" id="btn-tab-markov" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-network-wired"></i> Matriz Markov (77x77)
+            </button>
+            <button onclick="switchTab('tab-data')" id="btn-tab-data" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-emerald-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-paste"></i> Ingesta 1-Clic / Portapapeles
+            </button>
+            <button onclick="switchTab('tab-backtest')" id="btn-tab-backtest" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> Auditoría & Backtesting
+            </button>
+            <button onclick="switchTab('tab-table')" id="btn-tab-table" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-list-ol"></i> Tabla Oficial (00-75)
+            </button>
+        </div>
+    </div>
+
+    <!-- ÁREA DE CONTENIDO -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- PESTAÑA 1: PRONÓSTICO & CONTROL DIARIO -->
+        <section id="tab-prediction" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Formulario de Registro -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-plus-circle text-emerald-400"></i> Registrar Sorteo
+                            </h2>
+                            <span class="text-[11px] text-gray-400 font-mono" id="clock-display">--:--:--</span>
+                        </div>
+                        <form id="draw-injector-form" class="space-y-4">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Fecha</label>
+                                <input type="date" id="input-draw-date" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Horario</label>
+                                    <select id="input-draw-time" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
+                                        <option value="08:00 AM">08:00 AM</option>
+                                        <option value="09:00 AM">09:00 AM</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="11:00 AM">11:00 AM</option>
+                                        <option value="12:00 PM">12:00 PM</option>
+                                        <option value="01:00 PM">01:00 PM</option>
+                                        <option value="02:00 PM">02:00 PM</option>
+                                        <option value="03:00 PM">03:00 PM</option>
+                                        <option value="04:00 PM">04:00 PM</option>
+                                        <option value="05:00 PM">05:00 PM</option>
+                                        <option value="06:00 PM">06:00 PM</option>
+                                        <option value="07:00 PM">07:00 PM</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Animalito (00-75)</label>
+                                    <select id="input-draw-animal" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
+                                        <!-- Opciones dinámicas -->
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-lg text-xs transition shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-bolt"></i> Inyectar al Historial MHE
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400 font-mono">
+                        <span>Estado: <strong class="text-emerald-400">Sincronizado</strong></span>
+                        <button onclick="resetToDefaultHistory()" class="text-rose-400 hover:underline">Reiniciar Data Demo</button>
+                    </div>
+                </div>
+
+                <!-- DISPLAY DEL PRONÓSTICO MHE -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between border-l-4 border-l-emerald-500 relative overflow-hidden">
+                    <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-crosshairs text-emerald-400"></i> Pronóstico de Selección Única MHE
+                                </h2>
+                                <p class="text-[11px] text-gray-400">Estrategia Estricta Sin Coberturas (Single Choice - 100% Precisión Target)</p>
+                            </div>
+                            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full text-[10px] font-mono font-bold uppercase">
+                                Modo Único Activo
+                            </span>
+                        </div>
+
+                        <!-- Tarjeta del Pronóstico -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-2">
+                            <div class="bg-dark-900/90 border border-emerald-500/50 rounded-xl p-4 flex items-center justify-between shadow-inner">
+                                <div>
+                                    <span class="text-[10px] font-mono text-emerald-400 font-bold block uppercase">Eje de Pronóstico</span>
+                                    <div class="text-4xl font-extrabold text-white font-mono mt-1" id="pred-num">--</div>
+                                    <div class="text-xs text-gray-300 font-semibold" id="pred-name">Procesando...</div>
+                                </div>
+                                <div class="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl text-emerald-400" id="pred-icon">
+                                    <i class="fa-solid fa-gem"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-dark-900/60 border border-gray-800 rounded-xl p-4 flex flex-col justify-between">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-400">Confianza Estocástica</span>
+                                    <span class="text-xs font-mono text-emerald-400 font-bold" id="pred-confidence">0.0%</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden my-2">
+                                    <div id="pred-confidence-bar" class="bg-emerald-400 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                                <div class="text-[11px] text-gray-400 flex justify-between font-mono">
+                                    <span>Markov St-1: <strong id="pred-markov-weight" class="text-white">--</strong></span>
+                                    <span>Poisson: <strong id="pred-poisson-mult" class="text-white">--</strong></span>
+                                </div>
+                            </div>
+
+                            <div class="bg-dark-900/60 border border-gray-800 rounded-xl p-4 flex flex-col justify-between">
+                                <span class="text-xs text-gray-400">Vector de Entrada ($S_{t-2} \rightarrow S_{t-1}$)</span>
+                                <div class="text-xs font-mono text-emerald-300 font-bold my-1" id="pred-input-vector">
+                                    -- &rarr; --
+                                </div>
+                                <span class="text-[10px] text-gray-500">Evaluado sobre base ajustada 00-75</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secuencia Reciente -->
+                    <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs overflow-x-auto">
+                        <span class="text-gray-400 font-mono text-[11px] whitespace-nowrap mr-2">Última Secuencia:</span>
+                        <div class="flex items-center gap-1.5 font-mono overflow-x-auto py-1" id="recent-chips-container">
+                            <!-- Chips -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Paneles Inferiores -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Fatiga de Decenas -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-emerald-400"></i> Presión / Fatiga por Decenas
+                    </h3>
+                    <div class="space-y-2.5" id="decenas-container">
+                        <!-- Barras de decenas -->
+                    </div>
+                </div>
+
+                <!-- Tabla de Resultados Recientes -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Últimos Resultados Registrados
+                            </h3>
+                            <span class="text-[11px] text-gray-400 font-mono" id="daily-table-count">0 sorteos</span>
+                        </div>
+                        <div class="overflow-y-auto max-h-64">
+                            <table class="w-full text-left text-xs font-mono">
+                                <thead class="bg-dark-900 text-gray-400 sticky top-0">
+                                    <tr>
+                                        <th class="p-2">Fecha</th>
+                                        <th class="p-2">Hora</th>
+                                        <th class="p-2">Número</th>
+                                        <th class="p-2">Animal</th>
+                                        <th class="p-2 text-right">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="daily-table-body" class="divide-y divide-gray-800/50 text-gray-300">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 2: MATRIZ MARKOV -->
+        <section id="tab-markov" class="hidden space-y-6">
+            <div class="glass-panel p-5 rounded-2xl shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-network-wired text-emerald-400"></i> Matriz de Transición Markov (2º Grado)
+                        </h2>
+                        <p class="text-xs text-gray-400">Top candidatos calculados sobre las 77 posiciones oficial de Guácharo Activo</p>
+                    </div>
+                    <div class="text-xs font-mono bg-dark-900 px-3 py-1.5 rounded-lg border border-gray-800" id="markov-current-vector">
+                        Vector: --
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-mono">
+                        <thead class="bg-dark-900 text-gray-400 uppercase">
+                            <tr>
+                                <th class="p-3">Rank / Número</th>
+                                <th class="p-3">Animalito</th>
+                                <th class="p-3">Markov (2º Grado)</th>
+                                <th class="p-3">Markov (1º Grado)</th>
+                                <th class="p-3">Mult. Poisson</th>
+                                <th class="p-3 text-right">Puntaje Estocástico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="markov-matrix-tbody" class="divide-y divide-gray-800 text-gray-200">
+                            <!-- Dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 3: INGESTA 1-CLIC / PORTAPAPELES -->
+        <section id="tab-data" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Ingesta por Portapapeles o Texto Libre -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-paste text-emerald-400"></i> Ingesta Instantánea (Bypass Anti-CORS)
+                        </h2>
+                        <p class="text-xs text-gray-400 mb-4">
+                            Copia los resultados de cualquier página oficial (ej: LotoVen, TuAzar) y haz clic en el botón verde. El motor extraerá los números sin duplicar.
+                        </p>
+                        <button onclick="readClipboardAndProcess()" class="w-full py-3 mb-4 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paste text-base"></i> Pegar Desde Portapapeles (1-Clic)
+                        </button>
+                        <textarea id="raw-import-textarea" rows="6" placeholder="O pega manualmente líneas aquí:&#10;08:00 AM - 66 Lobo&#10;09:00 AM - 37 Tortuga" class="w-full bg-dark-900 border border-gray-700 rounded-xl p-3 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="mt-4 flex gap-3">
+                        <button onclick="processRawImportText()" class="flex-1 py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-bold rounded-lg text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-import text-emerald-400"></i> Procesar Texto Pegado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Respaldos JSON -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-emerald-400"></i> Copia de Seguridad JSON
+                        </h2>
+                        <p class="text-xs text-gray-400 mb-4">
+                            Exporta tu base de datos para no perder tus registros o impórtala de un archivo guardado.
+                        </p>
+
+                        <div class="space-y-3">
+                            <button onclick="exportDatabaseJSON()" class="w-full py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-semibold rounded-lg text-xs transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download text-emerald-400"></i> Exportar BD Completa (JSON)
+                            </button>
+                            <label class="w-full py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-semibold rounded-lg text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-upload text-emerald-400"></i> Importar Archivo JSON
+                                <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importDatabaseJSON(event)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-800 text-xs text-gray-500 font-mono">
+                        Almacenamiento Local (LocalStorage): <strong class="text-gray-300">Activo</strong>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PESTAÑA 4: AUDITORÍA & BACKTESTING -->
+        <section id="tab-backtest" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Métricas -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-microscope text-emerald-400"></i> Auditoría MHE
+                            </h2>
+                            <select id="backtest-window-select" onchange="runBacktestAudit()" class="bg-dark-900 border border-gray-700 text-xs text-gray-300 rounded px-2.5 py-1 font-mono focus:outline-none">
+                                <option value="10">Últimos 10 sorteos</option>
+                                <option value="30" selected>Últimos 30 sorteos</option>
+                                <option value="50">Últimos 50 sorteos</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-dark-900 p-4 rounded-xl border border-gray-800 text-center">
+                                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Tasa de Acierto (Opción Única)</span>
+                                <div class="text-4xl font-extrabold font-mono text-emerald-400 my-1" id="audit-rate">0.0%</div>
+                                <div class="text-xs text-gray-400" id="audit-detail-text">0 aciertos evaluados</div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                                <div class="bg-dark-900/60 p-3 rounded-lg border border-gray-800">
+                                    <span class="text-gray-400 block text-[10px]">Racha Negativa Máx</span>
+                                    <strong class="text-rose-400 text-sm" id="audit-max-loss">0</strong>
+                                </div>
+                                <div class="bg-dark-900/60 p-3 rounded-lg border border-gray-800">
+                                    <span class="text-gray-400 block text-[10px]">Acierto Consecutivo</span>
+                                    <strong class="text-emerald-400 text-sm" id="audit-max-win">0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica Canvas -->
+                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-emerald-400"></i> Curva de Rendimiento Histórico (%)
+                        </h2>
+                        <div class="w-full h-56 bg-dark-900/60 rounded-xl p-3 border border-gray-800">
+                            <canvas id="audit-canvas" class="w-full h-full block"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PESTAÑA 5: TABLA OFICIAL (00-75) -->
+        <section id="tab-table" class="hidden space-y-6">
+            <div class="glass-panel p-5 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol text-emerald-400"></i> Tabla Oficial Guácharo Activo (77 Nodos)
+                        </h2>
+                        <p class="text-xs text-gray-400">Puedes editar los nombres de los animalitos si ocurren actualizaciones oficiales.</p>
+                    </div>
+                    <button onclick="saveCustomAnimalsTable()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-lg text-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[600px] overflow-y-auto pr-1" id="animals-grid-container">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MOTOR LÓGICO COMPLETO -->
+    <script>
+        // TABLA OFICIAL COMPLETA (00 AL 75 = 77 NODOS)
+        const DEFAULT_ANIMALS = [
+            { num: "0", name: "Delfín", icon: "fa-water" },
+            { num: "00", name: "Ballena", icon: "fa-fish" },
+            { num: "1", name: "Carnero", icon: "fa-paw" },
+            { num: "2", name: "Toro", icon: "fa-shield-cat" },
+            { num: "3", name: "Ciempiés", icon: "fa-bug" },
+            { num: "4", name: "Alacrán", icon: "fa-bug" },
+            { num: "5", name: "León", icon: "fa-cat" },
+            { num: "6", name: "Rana", icon: "fa-frog" },
+            { num: "7", name: "Perico", icon: "fa-kiwi-bird" },
+            { num: "8", name: "Ratón", icon: "fa-vcard" },
+            { num: "9", name: "Águila", icon: "fa-crow" },
+            { num: "10", name: "Tigre", icon: "fa-shield-cat" },
+            { num: "11", name: "Gato", icon: "fa-cat" },
+            { num: "12", name: "Caballo", icon: "fa-horse" },
+            { num: "13", name: "Mono", icon: "fa-ghost" },
+            { num: "14", name: "Paloma", icon: "fa-dove" },
+            { num: "15", name: "Zorro", icon: "fa-dog" },
+            { num: "16", name: "Oso", icon: "fa-paw" },
+            { num: "17", name: "Pavo", icon: "fa-drumstick-bite" },
+            { num: "18", name: "Burro", icon: "fa-horse-head" },
+            { num: "19", name: "Chivo", icon: "fa-hippo" },
+            { num: "20", name: "Cochino", icon: "fa-piggy-bank" },
+            { num: "21", name: "Gallo", icon: "fa-feather" },
+            { num: "22", name: "Camello", icon: "fa-scroll" },
+            { num: "23", name: "Cebra", icon: "fa-horse" },
+            { num: "24", name: "Iguana", icon: "fa-dragon" },
+            { num: "25", name: "Gallina", icon: "fa-feather-pointed" },
+            { num: "26", name: "Vaca", icon: "fa-cow" },
+            { num: "27", name: "Perro", icon: "fa-dog" },
+            { num: "28", name: "Zamuro", icon: "fa-crow" },
+            { num: "29", name: "Elefante", icon: "fa-hippo" },
+            { num: "30", name: "Caimán", icon: "fa-dragon" },
+            { num: "31", name: "Lapa", icon: "fa-otter" },
+            { num: "32", name: "Ardilla", icon: "fa-paw" },
+            { num: "33", name: "Pescado", icon: "fa-fish" },
+            { num: "34", name: "Venado", icon: "fa-mask" },
+            { num: "35", name: "Jirafa", icon: "fa-highlighter" },
+            { num: "36", name: "Culebra", icon: "fa-staff-snake" },
+            { num: "37", name: "Tortuga", icon: "fa-otter" },
+            { num: "38", name: "Búfalo", icon: "fa-cow" },
+            { num: "39", name: "Lechuza", icon: "fa-feather" },
+            { num: "40", name: "Avispa", icon: "fa-bug" },
+            { num: "41", name: "Canguro", icon: "fa-paw" },
+            { num: "42", name: "Tucán", icon: "fa-crow" },
+            { num: "43", name: "Mariposa", icon: "fa-bug" },
+            { num: "44", name: "Chigüire", icon: "fa-otter" },
+            { num: "45", name: "Garza", icon: "fa-dove" },
+            { num: "46", name: "Puma", icon: "fa-cat" },
+            { num: "47", name: "Pavo Real", icon: "fa-feather-pointed" },
+            { num: "48", name: "Puercoespín", icon: "fa-bug" },
+            { num: "49", name: "Pereza", icon: "fa-face-rolling-eyes" },
+            { num: "50", name: "Canario", icon: "fa-kiwi-bird" },
+            { num: "51", name: "Pelícano", icon: "fa-dove" },
+            { num: "52", name: "Pulpo", icon: "fa-disease" },
+            { num: "53", name: "Caracol", icon: "fa-stroopwafel" },
+            { num: "54", name: "Grillo", icon: "fa-bug" },
+            { num: "55", name: "Oso Hormiguero", icon: "fa-paw" },
+            { num: "56", name: "Tiburón", icon: "fa-fish-fins" },
+            { num: "57", name: "Pato", icon: "fa-dove" },
+            { num: "58", name: "Hormiga", icon: "fa-bug" },
+            { num: "59", name: "Pantera", icon: "fa-cat" },
+            { num: "60", name: "Camaleón", icon: "fa-dragon" },
+            { num: "61", name: "Panda", icon: "fa-paw" },
+            { num: "62", name: "Cachicamo", icon: "fa-shield-cat" },
+            { num: "63", name: "Cangrejo", icon: "fa-disease" },
+            { num: "64", name: "Gavilán", icon: "fa-crow" },
+            { num: "65", name: "Araña", icon: "fa-spider" },
+            { num: "66", name: "Lobo", icon: "fa-paw" },
+            { num: "67", name: "Avestruz", icon: "fa-kiwi-bird" },
+            { num: "68", name: "Jaguar", icon: "fa-cat" },
+            { num: "69", name: "Conejo", icon: "fa-paw" },
+            { num: "70", name: "Bisonte", icon: "fa-cow" },
+            { num: "71", name: "Guacamaya", icon: "fa-kiwi-bird" },
+            { num: "72", name: "Gorila", icon: "fa-ghost" },
+            { num: "73", name: "Hipopótamo", icon: "fa-hippo" },
+            { num: "74", name: "Turpial", icon: "fa-dove" },
+            { num: "75", name: "Guácharo", icon: "fa-feather" }
+        ];
+
+        // DATOS HISTÓRICOS DEMO
+        const DEFAULT_HISTORY = [
+            { id: 1, date: "2026-11-04", time: "08:00 AM", num: "12", name: "Caballo" },
+            { id: 2, date: "2026-11-04", time: "09:00 AM", num: "05", name: "León" },
+            { id: 3, date: "2026-11-04", time: "10:00 AM", num: "36", name: "Culebra" },
+            { id: 4, date: "2026-11-04", time: "11:00 AM", num: "21", name: "Gallo" },
+            { id: 5, date: "2026-11-04", time: "12:00 PM", num: "14", name: "Paloma" },
+            { id: 6, date: "2026-11-04", time: "01:00 PM", num: "3", name: "Ciempiés" },
+            { id: 7, date: "2026-11-04", time: "02:00 PM", num: "27", name: "Perro" },
+            { id: 8, date: "2026-11-04", time: "03:00 PM", num: "30", name: "Caimán" },
+            { id: 9, date: "2026-11-04", time: "04:00 PM", num: "19", name: "Chivo" },
+            { id: 10, date: "2026-11-04", time: "05:00 PM", num: "8", name: "Ratón" },
+            { id: 11, date: "2026-11-04", time: "06:00 PM", num: "33", name: "Pescado" },
+            { id: 12, date: "2026-11-04", time: "07:00 PM", num: "11", name: "Gato" },
+            { id: 13, date: "2026-11-05", time: "08:00 AM", num: "4", name: "Alacrán" },
+            { id: 14, date: "2026-11-05", time: "09:00 AM", num: "18", name: "Burro" },
+            { id: 15, date: "2026-11-05", time: "10:00 AM", num: "25", name: "Gallina" },
+            { id: 16, date: "2026-11-05", time: "11:00 AM", num: "9", name: "Águila" },
+            { id: 17, date: "2026-11-05", time: "12:00 PM", num: "31", name: "Lapa" },
+            { id: 18, date: "2026-11-05", time: "01:00 PM", num: "10", name: "Tigre" },
+            { id: 19, date: "2026-11-05", time: "02:00 PM", num: "22", name: "Camello" },
+            { id: 20, date: "2026-11-05", time: "03:00 PM", num: "15", name: "Zorro" },
+            { id: 21, date: "2026-11-05", time: "04:00 PM", num: "6", name: "Rana" },
+            { id: 22, date: "2026-11-05", time: "05:00 PM", num: "36", name: "Culebra" },
+            { id: 23, date: "2026-11-05", time: "06:00 PM", num: "28", name: "Zamuro" },
+            { id: 24, date: "2026-11-05", time: "07:00 PM", num: "2", name: "Toro" },
+            { id: 25, date: "2026-11-06", time: "08:00 AM", num: "66", name: "Lobo" },
+            { id: 26, date: "2026-11-06", time: "09:00 AM", num: "37", name: "Tortuga" },
+            { id: 27, date: "2026-11-06", time: "10:00 AM", num: "22", name: "Camello" },
+            { id: 28, date: "2026-11-06", time: "11:00 AM", num: "10", name: "Tigre" },
+            { id: 29, date: "2026-11-06", time: "12:00 PM", num: "70", name: "Bisonte" },
+            { id: 30, date: "2026-11-06", time: "01:00 PM", num: "72", name: "Gorila" },
+            { id: 31, date: "2026-11-06", time: "02:00 PM", num: "52", name: "Pulpo" },
+            { id: 32, date: "2026-11-06", time: "03:00 PM", num: "73", name: "Hipopótamo" }
+        ];
+
+        // ESTADO GLOBAL
+        let animalsList = [];
+        let animalMap = {};
+        let drawHistory = [];
+
+        function initApp() {
+            loadAnimalsTable();
+            loadHistoryData();
+            populateAnimalSelects();
+            renderAllViews();
+            initClock();
+            
+            const dateInput = document.getElementById('input-draw-date');
+            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+        }
+
+        function loadAnimalsTable() {
+            const saved = localStorage.getItem('guacharo_animals_db');
+            if (saved) {
+                try { animalsList = JSON.parse(saved); } catch(e) { animalsList = [...DEFAULT_ANIMALS]; }
+            } else {
+                animalsList = [...DEFAULT_ANIMALS];
+            }
+            rebuildAnimalMap();
+        }
+
+        function rebuildAnimalMap() {
+            animalMap = {};
+            animalsList.forEach(a => animalMap[a.num] = a);
+        }
+
+        function saveCustomAnimalsTable() {
+            animalsList.forEach(a => {
+                const input = document.getElementById(`animal-input-${a.num}`);
+                if (input) a.name = input.value.trim() || a.name;
+            });
+            localStorage.setItem('guacharo_animals_db', JSON.stringify(animalsList));
+            rebuildAnimalMap();
+            populateAnimalSelects();
+            renderAllViews();
+            alert('¡Tabla oficial de 00-75 actualizada correctamente!');
+        }
+
+        function loadHistoryData() {
+            const saved = localStorage.getItem('guacharo_history_db');
+            if (saved) {
+                try { drawHistory = JSON.parse(saved); } catch(e) { drawHistory = [...DEFAULT_HISTORY]; }
+            } else {
+                drawHistory = [...DEFAULT_HISTORY];
+            }
+        }
+
+        function saveHistoryData() {
+            localStorage.setItem('guacharo_history_db', JSON.stringify(drawHistory));
+        }
+
+        function resetToDefaultHistory() {
+            if (confirm('¿Restablecer la base de datos al historial por defecto?')) {
+                drawHistory = [...DEFAULT_HISTORY];
+                saveHistoryData();
+                renderAllViews();
+            }
+        }
+
+        function populateAnimalSelects() {
+            const select = document.getElementById('input-draw-animal');
+            if (!select) return;
+            select.innerHTML = '';
+            animalsList.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.num;
+                opt.innerText = `${a.num} - ${a.name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function getDecenaGroup(numStr) {
+            if (numStr === "0" || numStr === "00") return "0";
+            return numStr.length === 2 ? numStr.charAt(0) : "0";
+        }
+
+        function computeMHEModel(history) {
+            if (history.length < 3) return null;
+
+            const n = history.length;
+            const lastState = history[n - 1].num;
+            const prevLastState = history[n - 2].num;
+
+            const markov2 = {};
+            const markov1 = {};
+            const globalFreq = {};
+
+            animalsList.forEach(a => globalFreq[a.num] = 0);
+
+            for (let i = 0; i < n; i++) {
+                const current = history[i].num;
+                globalFreq[current] = (globalFreq[current] || 0) + 1;
+
+                if (i >= 1) {
+                    const p1 = history[i - 1].num;
+                    const pair = `${p1}->${current}`;
+                    markov1[pair] = (markov1[pair] || 0) + 1;
+                }
+
+                if (i >= 2) {
+                    const p2 = history[i - 2].num;
+                    const p1 = history[i - 1].num;
+                    const tri = `${p2}->${p1}->${current}`;
+                    markov2[tri] = (markov2[tri] || 0) + 1;
+                }
+            }
+
+            const decenasCount = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0, '7':0 };
+            const recentSlice = history.slice(-10);
+            recentSlice.forEach(item => {
+                const d = getDecenaGroup(item.num);
+                if (decenasCount[d] !== undefined) decenasCount[d]++;
+            });
+
+            const candidates = [];
+            const lastDecena = getDecenaGroup(lastState);
+            const lastTerminal = lastState.slice(-1);
+
+            animalsList.forEach(animal => {
+                const num = animal.num;
+                const triKey = `${prevLastState}->${lastState}->${num}`;
+                const pairKey = `${lastState}->${num}`;
+
+                const m2W = markov2[triKey] || 0;
+                const m1W = markov1[pairKey] || 0;
+                const baseFreq = (globalFreq[num] / n) * 100;
+
+                const dec = getDecenaGroup(num);
+                const term = num.slice(-1);
+
+                let mirrorBonus = 0;
+                if (term === lastTerminal) mirrorBonus += 12;
+                if (Math.abs(parseInt(dec) - parseInt(lastDecena)) === 1) mirrorBonus += 8;
+
+                const decFatigue = decenasCount[dec] || 0;
+                const poissonMult = decFatigue > 4 ? 0.65 : (decFatigue === 0 ? 1.35 : 1.0);
+
+                const score = ((m2W * 35) + (m1W * 20) + (baseFreq * 12) + mirrorBonus) * poissonMult;
+
+                candidates.push({
+                    num: num,
+                    name: animal.name,
+                    icon: animal.icon || 'fa-gem',
+                    score: parseFloat(score.toFixed(2)),
+                    m2Weight: m2W,
+                    m1Weight: m1W,
+                    poissonMult: poissonMult.toFixed(2),
+                    decena: dec,
+                    terminal: term
+                });
+            });
+
+            candidates.sort((a, b) => b.score - a.score);
+
+            return {
+                prevLastState,
+                lastState,
+                candidates,
+                decenasCount
+            };
+        }
+
+        function renderAllViews() {
+            const mhe = computeMHEModel(drawHistory);
+            
+            const sampleElem = document.getElementById('global-sample-count');
+            if (sampleElem) sampleElem.innerText = drawHistory.length;
+
+            if (mhe) {
+                renderPredictionTab(mhe);
+                renderMarkovTab(mhe);
+                renderPoissonDecenas(mhe.decenasCount);
+            }
+
+            renderDailyHistoryTable();
+            renderAnimalsGrid();
+            runBacktestAudit();
+        }
+
+        function renderPredictionTab(mhe) {
+            const top1 = mhe.candidates[0];
+
+            document.getElementById('pred-num').innerText = top1.num;
+            document.getElementById('pred-name').innerText = top1.name;
+            document.getElementById('pred-icon').innerHTML = `<i class="fa-solid ${top1.icon}"></i>`;
+
+            const conf = Math.min(Math.round((top1.score / 130) * 100), 99);
+            document.getElementById('pred-confidence').innerText = `${conf}%`;
+            document.getElementById('pred-confidence-bar').style.width = `${conf}%`;
+
+            document.getElementById('pred-markov-weight').innerText = `${top1.m2Weight} hit(s)`;
+            document.getElementById('pred-poisson-mult').innerText = `${top1.poissonMult}x`;
+
+            const pLastObj = animalMap[mhe.prevLastState] || { name: '?' };
+            const lastObj = animalMap[mhe.lastState] || { name: '?' };
+            document.getElementById('pred-input-vector').innerHTML = `
+                ${mhe.prevLastState} (${pLastObj.name}) &rarr; ${mhe.lastState} (${lastObj.name})
+            `;
+
+            const container = document.getElementById('recent-chips-container');
+            const recent = drawHistory.slice(-6);
+            container.innerHTML = recent.map((item, idx) => {
+                const isLast = idx === recent.length - 1;
+                return `
+                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg ${isLast ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 font-bold' : 'bg-dark-900 border border-gray-800 text-gray-400'}">
+                        <span>${item.num}</span>
+                        <span class="text-[10px] opacity-75">(${item.name})</span>
+                    </div>
+                `;
+            }).join('<i class="fa-solid fa-chevron-right text-gray-700 text-[10px]"></i>');
+        }
+
+        function renderMarkovTab(mhe) {
+            const vectorDesc = `${mhe.prevLastState} (${(animalMap[mhe.prevLastState]||{}).name}) &rarr; ${mhe.lastState} (${(animalMap[mhe.lastState]||{}).name})`;
+            document.getElementById('markov-current-vector').innerText = `Vector Actual: ${vectorDesc}`;
+
+            const tbody = document.getElementById('markov-matrix-tbody');
+            const topCandidates = mhe.candidates.slice(0, 10);
+
+            tbody.innerHTML = topCandidates.map((c, i) => `
+                <tr class="hover:bg-gray-800/40 transition">
+                    <td class="p-3 font-bold text-emerald-400">#${i + 1} - ${c.num}</td>
+                    <td class="p-3 font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid ${c.icon} text-gray-400"></i> ${c.name}
+                    </td>
+                    <td class="p-3 text-gray-300">${c.m2Weight} coincidencias</td>
+                    <td class="p-3 text-gray-300">${c.m1Weight} transiciones</td>
+                    <td class="p-3 text-gray-400">${c.poissonMult}x</td>
+                    <td class="p-3 text-right font-bold text-emerald-400 font-mono">${c.score} pts</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPoissonDecenas(decenasCount) {
+            const container = document.getElementById('decenas-container');
+            const maxVal = Math.max(...Object.values(decenasCount), 1);
+            const decLabels = ['00-09', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-75'];
+
+            container.innerHTML = Object.keys(decenasCount).map((d, i) => {
+                const count = decenasCount[d];
+                const pct = Math.round((count / maxVal) * 100);
+                const isFatigued = count >= 4;
+
+                return `
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-1 font-mono">
+                            <span class="text-gray-400">Decena ${decLabels[i]}</span>
+                            <span class="${isFatigued ? 'text-rose-400 font-bold' : 'text-gray-300'}">${count} sal. ${isFatigued ? '(Fatiga)' : ''}</span>
+                        </div>
+                        <div class="w-full bg-dark-900 h-2 rounded-full overflow-hidden border border-gray-800">
+                            <div class="h-full rounded-full transition-all duration-300 ${isFatigued ? 'bg-rose-500' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDailyHistoryTable() {
+            const tbody = document.getElementById('daily-table-body');
+            const list = [...drawHistory].reverse();
+            document.getElementById('daily-table-count').innerText = `${list.length} sorteos`;
+
+            tbody.innerHTML = list.map(item => `
+                <tr class="hover:bg-gray-800/30 transition">
+                    <td class="p-2 text-gray-400">${item.date || '--'}</td>
+                    <td class="p-2 text-emerald-400 font-semibold">${item.time}</td>
+                    <td class="p-2 font-bold text-white">${item.num}</td>
+                    <td class="p-2 text-gray-300">${item.name}</td>
+                    <td class="p-2 text-right">
+                        <button onclick="deleteDrawRecord(${item.id})" class="text-gray-500 hover:text-rose-400">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAnimalsGrid() {
+            const container = document.getElementById('animals-grid-container');
+            container.innerHTML = animalsList.map(a => `
+                <div class="bg-dark-900 p-2.5 rounded-xl border border-gray-800 flex items-center gap-2">
+                    <span class="font-mono text-emerald-400 font-bold w-7">${a.num}</span>
+                    <input type="text" id="animal-input-${a.num}" value="${a.name}" class="w-full bg-dark-950 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
+                </div>
+            `).join('');
+        }
+
+        async function readClipboardAndProcess() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text || text.trim().length === 0) {
+                    alert('El portapapeles está vacío.');
+                    return;
+                }
+                parseAndInjectRawText(text);
+            } catch (err) {
+                alert('Pega el texto directamente en el recuadro inferior.');
+            }
+        }
+
+        function parseAndInjectRawText(rawText) {
+            let matchesCount = 0;
+            let addedCount = 0;
+            const lines = rawText.split('\n');
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            lines.forEach(line => {
+                if (!line.trim()) return;
+
+                const timeMatch = line.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
+                const numMatch = line.match(/\b(00|0|[1-9]|[1-6][0-9]|7[0-5])\b/);
+
+                if (numMatch) {
+                    matchesCount++;
+                    let num = numMatch[1];
+                    let time = timeMatch ? timeMatch[0].toUpperCase() : '12:00 PM';
+                    if (time.length === 7) time = '0' + time;
+
+                    const animalObj = animalMap[num] || { name: 'Desconocido' };
+                    const exists = drawHistory.some(h => h.date === currentDate && h.time === time);
+
+                    if (!exists) {
+                        drawHistory.push({
+                            id: Date.now() + Math.random(),
+                            date: currentDate,
+                            time: time,
+                            num: num,
+                            name: animalObj.name
+                        });
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                saveHistoryData();
+                renderAllViews();
+                alert(`¡Se parsearon e inyectaron ${addedCount} sorteo(s) nuevos!`);
+            } else {
+                alert(`No se detectaron nuevos sorteos para agregar (${matchesCount} procesados).`);
+            }
+        }
+
+        document.getElementById('draw-injector-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('input-draw-date').value;
+            const time = document.getElementById('input-draw-time').value;
+            const num = document.getElementById('input-draw-animal').value;
+            const animalObj = animalMap[num] || { name: 'Desconocido' };
+
+            drawHistory.push({
+                id: Date.now(),
+                date: date,
+                time: time,
+                num: num,
+                name: animalObj.name
+            });
+
+            saveHistoryData();
+            renderAllViews();
+        });
+
+        function deleteDrawRecord(id) {
+            drawHistory = drawHistory.filter(h => h.id !== id);
+            saveHistoryData();
+            renderAllViews();
+        }
+
+        function processRawImportText() {
+            const raw = document.getElementById('raw-import-textarea').value.trim();
+            if (!raw) return;
+            parseAndInjectRawText(raw);
+            document.getElementById('raw-import-textarea').value = '';
+        }
+
+        function exportDatabaseJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                animals: animalsList,
+                history: drawHistory
+            }, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `guacharo_mhe_db_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchorElem.click();
+        }
+
+        function importDatabaseJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.history && Array.isArray(parsed.history)) {
+                        drawHistory = parsed.history;
+                        if (parsed.animals) animalsList = parsed.animals;
+                        rebuildAnimalMap();
+                        saveHistoryData();
+                        saveCustomAnimalsTable();
+                        renderAllViews();
+                        alert('¡Base de datos JSON importada con éxito!');
+                    }
+                } catch(err) {
+                    alert('Error al leer el archivo JSON.');
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function runBacktestAudit() {
+            const selectElem = document.getElementById('backtest-window-select');
+            if (!selectElem) return;
+            const windowSize = parseInt(selectElem.value);
+
+            if (drawHistory.length <= windowSize + 2) {
+                document.getElementById('audit-rate').innerText = 'N/A';
+                document.getElementById('audit-detail-text').innerText = 'Insuficientes datos';
+                return;
+            }
+
+            const startIndex = drawHistory.length - windowSize;
+            let hits = 0;
+            let totalEvaluated = 0;
+            let maxLoss = 0, currentLoss = 0;
+            let maxWin = 0, currentWin = 0;
+            const trend = [];
+
+            for (let i = startIndex; i < drawHistory.length; i++) {
+                const subHistory = drawHistory.slice(0, i);
+                const actual = drawHistory[i].num;
+
+                const mhe = computeMHEModel(subHistory);
+                if (!mhe || mhe.candidates.length === 0) continue;
+
+                totalEvaluated++;
+                const isHit = mhe.candidates[0].num === actual;
+
+                if (isHit) {
+                    hits++;
+                    currentWin++;
+                    currentLoss = 0;
+                    if (currentWin > maxWin) maxWin = currentWin;
+                } else {
+                    currentLoss++;
+                    currentWin = 0;
+                    if (currentLoss > maxLoss) maxLoss = currentLoss;
+                }
+
+                trend.push(parseFloat(((hits / totalEvaluated) * 100).toFixed(1)));
+            }
+
+            const rate = totalEvaluated > 0 ? ((hits / totalEvaluated) * 100).toFixed(1) : 0;
+            document.getElementById('audit-rate').innerText = `${rate}%`;
+            document.getElementById('audit-detail-text').innerText = `${hits} aciertos de ${totalEvaluated} evaluados`;
+            document.getElementById('audit-max-loss').innerText = maxLoss;
+            document.getElementById('audit-max-win').innerText = maxWin;
+            document.getElementById('global-win-rate').innerText = `${rate}%`;
+
+            renderCanvasChart(trend);
+        }
+
+        function renderCanvasChart(trendData) {
+            const canvas = document.getElementById('audit-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!trendData || trendData.length === 0) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const pad = 20;
+
+            ctx.strokeStyle = '#1f2937';
+            ctx.lineWidth = 1;
+            for (let yPct of [0.25, 0.5, 0.75]) {
+                ctx.beginPath();
+                ctx.moveTo(pad, h * yPct);
+                ctx.lineTo(w - pad, h * yPct);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            const step = (w - pad * 2) / (trendData.length - 1 || 1);
+
+            trendData.forEach((val, idx) => {
+                const x = pad + (idx * step);
+                const y = h - pad - ((val / 100) * (h - pad * 2));
+                if (idx === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+
+            ctx.stroke();
+        }
+
+        function switchTab(tabId) {
+            ['tab-prediction', 'tab-markov', 'tab-data', 'tab-backtest', 'tab-table'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+            
+            const btnTarget = document.getElementById(`btn-${tabId}`);
+            if (btnTarget) btnTarget.classList.add('active');
+
+            if (tabId === 'tab-backtest') {
+                setTimeout(runBacktestAudit, 100);
+            }
+        }
+
+        function initClock() {
+            setInterval(() => {
+                const clock = document.getElementById('clock-display');
+                if (clock) clock.innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        window.addEventListener('resize', () => {
+            runBacktestAudit();
+        });
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
