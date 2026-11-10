@@ -620,12 +620,16 @@
             return numStr.length === 2 ? numStr.charAt(0) : "0";
         }
 
-        function computeMHEModel(history) {
+                function computeMHEModel(history) {
             if (history.length < 3) return null;
 
             const n = history.length;
             const lastState = history[n - 1].num;
             const prevLastState = history[n - 2].num;
+            
+            // Obtener los últimos 2 números para aplicar penalización estricta de repetición
+            const ultimo = lastState;
+            const anteultimo = prevLastState;
 
             const markov2 = {};
             const markov1 = {};
@@ -675,13 +679,23 @@
                 const term = num.slice(-1);
 
                 let mirrorBonus = 0;
-                if (term === lastTerminal) mirrorBonus += 12;
-                if (Math.abs(parseInt(dec) - parseInt(lastDecena)) === 1) mirrorBonus += 8;
+                if (term === lastTerminal) mirrorBonus += 6;
+                if (Math.abs(parseInt(dec) - parseInt(lastDecena)) === 1) mirrorBonus += 4;
 
                 const decFatigue = decenasCount[dec] || 0;
-                const poissonMult = decFatigue > 4 ? 0.65 : (decFatigue === 0 ? 1.35 : 1.0);
+                const poissonMult = decFatigue > 4 ? 0.5 : (decFatigue === 0 ? 1.5 : 1.0);
 
-                const score = ((m2W * 35) + (m1W * 20) + (baseFreq * 12) + mirrorBonus) * poissonMult;
+                let score = ((m2W * 35) + (m1W * 20) + (baseFreq * 8) + mirrorBonus) * poissonMult;
+
+                // CORRECCIÓN CRÍTICIA: Penalización drástica por repetición inmediata
+                if (num === ultimo) {
+                    score -= 50.0; // Castiga fuertemente el número que acaba de salir
+                } else if (num === anteultimo) {
+                    score -= 25.0; // Castiga al penúltimo
+                }
+
+                // Ruido estocástico controlado para romper empates y forzar rotación
+                score += Math.random() * 5.0;
 
                 candidates.push({
                     num: num,
@@ -704,7 +718,8 @@
                 candidates,
                 decenasCount
             };
-        }
+                }
+        
 
         function renderAllViews() {
             const mhe = computeMHEModel(drawHistory);
