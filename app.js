@@ -1,8 +1,6 @@
 // ==========================================
-// CONFIGURACIÓN DE LA TÓMBOLA OFICIAL (00-75)
-// ==========================================
-
 // TÓMBOLA OFICIAL CORREGIDA (00 = Ballena, 0 = Delfín)
+// ==========================================
 const DEFAULT_ANIMALS = [
     { num: "00", name: "Ballena", icon: "fa-fish" },
     { num: "0", name: "Delfín", icon: "fa-water" },
@@ -83,19 +81,7 @@ const DEFAULT_ANIMALS = [
     { num: "75", name: "Guácharo", icon: "fa-feather" }
 ];
 
-const DEFAULT_HISTORY = [
-    { id: 1, date: "2026-11-04", time: "08:00 AM", num: "12", name: "Caballo" },
-    { id: 2, date: "2026-11-04", time: "09:00 AM", num: "05", name: "León" },
-    { id: 3, date: "2026-11-04", time: "10:00 AM", num: "36", name: "Culebra" },
-    { id: 4, date: "2026-11-04", time: "11:00 AM", num: "21", name: "Gallo" },
-    { id: 5, date: "2026-11-04", time: "12:00 PM", num: "14", name: "Paloma" },
-    { id: 6, date: "2026-11-04", time: "01:00 PM", num: "03", name: "Ciempiés" },
-    { id: 7, date: "2026-11-04", time: "02:00 PM", num: "27", name: "Perro" }
-];
-
-// ==========================================
-// ESTADO GLOBAL Y UTILIDADES DE NORMALIZACIÓN
-// ==========================================
+// ESTADO GLOBAL
 let animalsList = [];
 let animalMap = {};
 let drawHistory = [];
@@ -141,11 +127,12 @@ function loadAnimalsTable() {
 function rebuildAnimalMap() {
     animalMap = {};
     animalsList.forEach(a => {
-        let norm = normalizeNumStr(a.num);
-        animalMap[norm] = a;
-        animalMap[a.num] = a;
-        if (norm.startsWith("0") && norm !== "0" && norm !== "00") {
-            animalMap[norm.substring(1)] = a;
+        let raw = String(a.num).trim();
+        animalMap[raw] = a;
+        if (raw.length === 1 && raw !== "0") {
+            animalMap["0" + raw] = a;
+        } else if (raw.length === 2 && raw.startsWith("0") && raw !== "00") {
+            animalMap[raw.substring(1)] = a;
         }
     });
 }
@@ -153,9 +140,9 @@ function rebuildAnimalMap() {
 function loadHistoryData() {
     const saved = localStorage.getItem('guacharo_history_db');
     if (saved) {
-        try { drawHistory = JSON.parse(saved); } catch(e) { drawHistory = [...DEFAULT_HISTORY]; }
+        try { drawHistory = JSON.parse(saved); } catch(e) { drawHistory = []; }
     } else {
-        drawHistory = [...DEFAULT_HISTORY];
+        drawHistory = [];
     }
 }
 
@@ -163,9 +150,9 @@ function saveHistoryData() {
     localStorage.setItem('guacharo_history_db', JSON.stringify(drawHistory));
 }
 
-function resetToDefaultHistory() {
-    if (confirm('¿Restablecer la base de datos al historial por defecto?')) {
-        drawHistory = [...DEFAULT_HISTORY];
+function clearHistoryData() {
+    if (confirm('¿Vaciar por completo la base de datos activa?')) {
+        drawHistory = [];
         saveHistoryData();
         renderAllViews();
     }
@@ -189,10 +176,10 @@ function getDecenaGroup(numStr) {
 }
 
 // ==========================================
-// MOTOR MHE (MARKOV 2º + POISSON + ANTIRREPETICIÓN)
+// MOTOR MHE (PROCESAMIENTO PURO DE BASE ACTIVA)
 // ==========================================
 function computeMHEModel(history) {
-    if (history.length < 3) return null;
+    if (!history || history.length < 3) return null;
 
     const n = history.length;
     const lastState = normalizeNumStr(history[n - 1].num);
@@ -226,8 +213,7 @@ function computeMHEModel(history) {
     }
 
     const decenasCount = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0, '7':0 };
-    const recentSlice = history.slice(-12);
-    recentSlice.forEach(item => {
+    history.forEach(item => {
         const d = getDecenaGroup(normalizeNumStr(item.num));
         if (decenasCount[d] !== undefined) decenasCount[d]++;
     });
@@ -268,7 +254,7 @@ function computeMHEModel(history) {
             score -= 30.0;
         }
 
-        score += Math.random() * 4.0;
+        score += Math.random() * 2.0;
 
         candidates.push({
             num: animal.num,
@@ -295,15 +281,13 @@ function computeMHEModel(history) {
 }
 
 // ==========================================
-// PARSER DE ENTRADA POR PARES (BLOQUES EXACTOS)
+// PARSER CON REEMPLAZO DIRECTO (SIN HISTORIAL VIEJO)
 // ==========================================
 function parseAndInjectRawText(rawText) {
-    let addedCount = 0;
-    // Filtrar líneas vacías
+    let newDraws = [];
     const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     const defaultDate = document.getElementById('input-draw-date').value || new Date().toISOString().split('T')[0];
 
-    // Procesar estrictamente en bloques de 2 líneas (Par: [Animal/Número, Hora])
     for (let i = 0; i < lines.length - 1; i += 2) {
         let line1 = lines[i];
         let line2 = lines[i + 1];
@@ -312,7 +296,6 @@ function parseAndInjectRawText(rawText) {
         let animalName = null;
         let timeStr = null;
 
-        // Determinar cuál línea es el número/animal y cuál es la hora
         const timeMatch1 = line1.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
         const timeMatch2 = line2.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
 
@@ -332,41 +315,33 @@ function parseAndInjectRawText(rawText) {
             }
         }
 
-        // Si tenemos un par válido, validamos y agregamos
         if (numStr !== null && timeStr !== null) {
-            let norm = normalizeNumStr(numStr);
-            let animalObj = animalMap[norm] || animalMap[numStr] || { name: animalName || 'Desconocido' };
+            let cleanKey = String(numStr).trim();
+            let animalObj = animalMap[cleanKey] || { name: animalName || 'Desconocido' };
 
-            const exists = drawHistory.some(h => 
-                h.date === defaultDate && 
-                normalizeTimeStr(h.time) === timeStr && 
-                normalizeNumStr(h.num) === norm
-            );
-
-            if (!exists) {
-                drawHistory.push({
-                    id: Date.now() + Math.random(),
-                    date: defaultDate,
-                    time: timeStr,
-                    num: numStr,
-                    name: animalObj.name
-                });
-                addedCount++;
-            }
+            newDraws.push({
+                id: Date.now() + Math.random(),
+                date: defaultDate,
+                time: timeStr,
+                num: cleanKey,
+                name: animalObj.name
+            });
         }
     }
 
-    if (addedCount > 0) {
+    if (newDraws.length > 0) {
+        // SOBRESCRIBIR BASE COMPLETA
+        drawHistory = newDraws;
         saveHistoryData();
         renderAllViews();
-        alert(`¡Se inyectaron exactamente ${addedCount} sorteo(s) sin duplicar!`);
+        alert(`¡Base sobrescrita con éxito! Se cargaron exactamente ${newDraws.length} sorteos activos.`);
     } else {
-        alert('No se agregaron nuevos sorteos. Los registros ya existían o el formato por pares no coincidió.');
+        alert('No se pudieron procesar los bloques. Asegúrate de pegar los pares en líneas alternas.');
     }
 }
 
 // ==========================================
-// RENDERIZADO Y CONTROL DE VISTAS
+// VISTAS Y CONTROLADORES
 // ==========================================
 function renderAllViews() {
     const mhe = computeMHEModel(drawHistory);
@@ -378,6 +353,11 @@ function renderAllViews() {
         renderPredictionTab(mhe);
         renderMarkovTab(mhe);
         renderPoissonDecenas(mhe.decenasCount);
+    } else {
+        document.getElementById('pred-num').innerText = "--";
+        document.getElementById('pred-name').innerText = "Carga al menos 3 sorteos";
+        document.getElementById('pred-confidence').innerText = "0.0%";
+        document.getElementById('pred-confidence-bar').style.width = "0%";
     }
 
     renderDailyHistoryTable();
@@ -406,9 +386,8 @@ function renderPredictionTab(mhe) {
     `;
 
     const container = document.getElementById('recent-chips-container');
-    const recent = drawHistory.slice(-6);
-    container.innerHTML = recent.map((item, idx) => {
-        const isLast = idx === recent.length - 1;
+    container.innerHTML = drawHistory.map((item, idx) => {
+        const isLast = idx === drawHistory.length - 1;
         const norm = normalizeNumStr(item.num);
         const obj = animalMap[norm] || animalMap[item.num] || { name: item.name };
         return `
@@ -529,14 +508,14 @@ if (formInjector) {
         const date = document.getElementById('input-draw-date').value;
         const time = document.getElementById('input-draw-time').value;
         const num = document.getElementById('input-draw-animal').value;
-        const norm = normalizeNumStr(num);
-        const animalObj = animalMap[norm] || animalMap[num] || { name: 'Desconocido' };
+        const cleanKey = String(num).trim();
+        const animalObj = animalMap[cleanKey] || { name: 'Desconocido' };
 
         drawHistory.push({
             id: Date.now(),
             date: date,
             time: time,
-            num: num,
+            num: cleanKey,
             name: animalObj.name
         });
 
@@ -572,8 +551,7 @@ function importDatabaseJSON(event) {
             if (rawData && Array.isArray(rawData)) {
                 drawHistory = rawData.map(item => {
                     let rawNum = item.num !== undefined ? String(item.num).trim() : (item.numero !== undefined ? String(item.numero).trim() : "00");
-                    let norm = normalizeNumStr(rawNum);
-                    let foundObj = animalMap[norm] || animalMap[rawNum] || { name: item.animal || item.nombre || 'Desconocido' };
+                    let foundObj = animalMap[rawNum] || { name: item.animal || item.nombre || 'Desconocido' };
 
                     return {
                         id: item.id || (Date.now() + Math.random()),
@@ -608,20 +586,19 @@ function runBacktestAudit() {
     if (!selectElem) return;
     const windowSize = parseInt(selectElem.value);
 
-    if (drawHistory.length <= windowSize + 2) {
+    if (drawHistory.length <= 3) {
         document.getElementById('audit-rate').innerText = 'N/A';
-        document.getElementById('audit-detail-text').innerText = 'Insuficientes datos';
+        document.getElementById('audit-detail-text').innerText = 'Insuficientes datos en base activa';
         return;
     }
 
-    const startIndex = drawHistory.length - windowSize;
     let hits = 0;
     let totalEvaluated = 0;
     let maxLoss = 0, currentLoss = 0;
     let maxWin = 0, currentWin = 0;
     const trend = [];
 
-    for (let i = startIndex; i < drawHistory.length; i++) {
+    for (let i = 2; i < drawHistory.length; i++) {
         const subHistory = drawHistory.slice(0, i);
         const actualNorm = normalizeNumStr(drawHistory[i].num);
 
