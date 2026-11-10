@@ -1,4 +1,6 @@
-// TABLA OFICIAL COMPLETA (00 AL 75 = 77 NODOS ESTANDARIZADOS A 2 DÍGITOS)
+// ==========================================
+// CONFIGURACIÓN DE LA TÓMBOLA OFICIAL (00-75)
+// ==========================================
 const DEFAULT_ANIMALS = [
     { num: "00", name: "Delfín", icon: "fa-water" },
     { num: "0", name: "Ballena", icon: "fa-fish" },
@@ -79,7 +81,6 @@ const DEFAULT_ANIMALS = [
     { num: "75", name: "Guácharo", icon: "fa-feather" }
 ];
 
-// DATOS HISTÓRICOS DEMO
 const DEFAULT_HISTORY = [
     { id: 1, date: "2026-11-04", time: "08:00 AM", num: "12", name: "Caballo" },
     { id: 2, date: "2026-11-04", time: "09:00 AM", num: "05", name: "León" },
@@ -87,38 +88,32 @@ const DEFAULT_HISTORY = [
     { id: 4, date: "2026-11-04", time: "11:00 AM", num: "21", name: "Gallo" },
     { id: 5, date: "2026-11-04", time: "12:00 PM", num: "14", name: "Paloma" },
     { id: 6, date: "2026-11-04", time: "01:00 PM", num: "03", name: "Ciempiés" },
-    { id: 7, date: "2026-11-04", time: "02:00 PM", num: "27", name: "Perro" },
-    { id: 8, date: "2026-11-04", time: "03:00 PM", num: "30", name: "Caimán" },
-    { id: 9, date: "2026-11-04", time: "04:00 PM", num: "19", name: "Chivo" },
-    { id: 10, date: "2026-11-04", time: "05:00 PM", num: "08", name: "Ratón" },
-    { id: 11, date: "2026-11-04", time: "06:00 PM", num: "33", name: "Pescado" },
-    { id: 12, date: "2026-11-04", time: "07:00 PM", num: "11", name: "Gato" },
-    { id: 13, date: "2026-11-05", time: "08:00 AM", num: "04", name: "Alacrán" },
-    { id: 14, date: "2026-11-05", time: "09:00 AM", num: "18", name: "Burro" },
-    { id: 15, date: "2026-11-05", time: "10:00 AM", num: "25", name: "Gallina" },
-    { id: 16, date: "2026-11-05", time: "11:00 AM", num: "09", name: "Águila" },
-    { id: 17, date: "2026-11-05", time: "12:00 PM", num: "31", name: "Lapa" },
-    { id: 18, date: "2026-11-05", time: "01:00 PM", num: "10", name: "Tigre" },
-    { id: 19, date: "2026-11-05", time: "02:00 PM", num: "22", name: "Camello" },
-    { id: 20, date: "2026-11-05", time: "03:00 PM", num: "15", name: "Zorro" },
-    { id: 21, date: "2026-11-05", time: "04:00 PM", num: "06", name: "Rana" },
-    { id: 22, date: "2026-11-05", time: "05:00 PM", num: "36", name: "Culebra" },
-    { id: 23, date: "2026-11-05", time: "06:00 PM", num: "28", name: "Zamuro" },
-    { id: 24, date: "2026-11-05", time: "07:00 PM", num: "02", name: "Toro" },
-    { id: 25, date: "2026-11-06", time: "08:00 AM", num: "66", name: "Lobo" },
-    { id: 26, date: "2026-11-06", time: "09:00 AM", num: "37", name: "Tortuga" },
-    { id: 27, date: "2026-11-06", time: "10:00 AM", num: "22", name: "Camello" },
-    { id: 28, date: "2026-11-06", time: "11:00 AM", num: "10", name: "Tigre" },
-    { id: 29, date: "2026-11-06", time: "12:00 PM", num: "70", name: "Bisonte" },
-    { id: 30, date: "2026-11-06", time: "01:00 PM", num: "72", name: "Gorila" },
-    { id: 31, date: "2026-11-06", time: "02:00 PM", num: "52", name: "Pulpo" },
-    { id: 32, date: "2026-11-06", time: "03:00 PM", num: "73", name: "Hipopótamo" }
+    { id: 7, date: "2026-11-04", time: "02:00 PM", num: "27", name: "Perro" }
 ];
 
-// ESTADO GLOBAL
+// ==========================================
+// ESTADO GLOBAL Y UTILIDADES DE NORMALIZACIÓN
+// ==========================================
 let animalsList = [];
 let animalMap = {};
 let drawHistory = [];
+
+function normalizeNumStr(num) {
+    if (num === undefined || num === null) return "00";
+    let s = String(num).trim();
+    if (s === "0" || s === "00") return s;
+    if (s.length === 1) return "0" + s;
+    return s;
+}
+
+function normalizeTimeStr(timeStr) {
+    if (!timeStr) return "12:00 PM";
+    let t = timeStr.trim().toUpperCase();
+    if (/^\d:[0-5]\d\s*(AM|PM)$/.test(t)) {
+        t = "0" + t;
+    }
+    return t;
+}
 
 function initApp() {
     loadAnimalsTable();
@@ -141,15 +136,6 @@ function loadAnimalsTable() {
     rebuildAnimalMap();
 }
 
-// NORMALIZACIÓN INTELIGENTE DE CEROS Y MAPEO DOBLE DE CLAVES
-function normalizeNumStr(num) {
-    if (num === undefined || num === null) return "00";
-    let s = String(num).trim();
-    if (s === "0" || s === "00") return s;
-    if (s.length === 1) return "0" + s;
-    return s;
-}
-
 function rebuildAnimalMap() {
     animalMap = {};
     animalsList.forEach(a => {
@@ -160,18 +146,6 @@ function rebuildAnimalMap() {
             animalMap[norm.substring(1)] = a;
         }
     });
-}
-
-function saveCustomAnimalsTable() {
-    animalsList.forEach(a => {
-        const input = document.getElementById(`animal-input-${a.num}`);
-        if (input) a.name = input.value.trim() || a.name;
-    });
-    localStorage.setItem('guacharo_animals_db', JSON.stringify(animalsList));
-    rebuildAnimalMap();
-    populateAnimalSelects();
-    renderAllViews();
-    alert('¡Tabla oficial de 00-75 actualizada correctamente!');
 }
 
 function loadHistoryData() {
@@ -212,7 +186,9 @@ function getDecenaGroup(numStr) {
     return numStr.length === 2 ? numStr.charAt(0) : "0";
 }
 
-// MOTOR COMPLETO MHE: MARKOV 2º GRADO + FATIGA POISSON + ROTACIÓN ESTOCÁSTICA
+// ==========================================
+// MOTOR MHE (MARKOV 2º + POISSON + ANTIRREPETICIÓN)
+// ==========================================
 function computeMHEModel(history) {
     if (history.length < 3) return null;
 
@@ -316,6 +292,80 @@ function computeMHEModel(history) {
     };
 }
 
+// ==========================================
+// PARSER DE ENTRADA POR PARES (BLOQUES EXACTOS)
+// ==========================================
+function parseAndInjectRawText(rawText) {
+    let addedCount = 0;
+    // Filtrar líneas vacías
+    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const defaultDate = document.getElementById('input-draw-date').value || new Date().toISOString().split('T')[0];
+
+    // Procesar estrictamente en bloques de 2 líneas (Par: [Animal/Número, Hora])
+    for (let i = 0; i < lines.length - 1; i += 2) {
+        let line1 = lines[i];
+        let line2 = lines[i + 1];
+
+        let numStr = null;
+        let animalName = null;
+        let timeStr = null;
+
+        // Determinar cuál línea es el número/animal y cuál es la hora
+        const timeMatch1 = line1.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
+        const timeMatch2 = line2.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
+
+        if (timeMatch1) {
+            timeStr = normalizeTimeStr(timeMatch1[0]);
+            let numMatch = line2.match(/\b(00|0|[1-9]|[1-6][0-9]|7[0-5])\b/);
+            if (numMatch) {
+                numStr = numMatch[1];
+                animalName = line2.replace(numStr, '').trim();
+            }
+        } else if (timeMatch2) {
+            timeStr = normalizeTimeStr(timeMatch2[0]);
+            let numMatch = line1.match(/\b(00|0|[1-9]|[1-6][0-9]|7[0-5])\b/);
+            if (numMatch) {
+                numStr = numMatch[1];
+                animalName = line1.replace(numStr, '').trim();
+            }
+        }
+
+        // Si tenemos un par válido, validamos y agregamos
+        if (numStr !== null && timeStr !== null) {
+            let norm = normalizeNumStr(numStr);
+            let animalObj = animalMap[norm] || animalMap[numStr] || { name: animalName || 'Desconocido' };
+
+            const exists = drawHistory.some(h => 
+                h.date === defaultDate && 
+                normalizeTimeStr(h.time) === timeStr && 
+                normalizeNumStr(h.num) === norm
+            );
+
+            if (!exists) {
+                drawHistory.push({
+                    id: Date.now() + Math.random(),
+                    date: defaultDate,
+                    time: timeStr,
+                    num: numStr,
+                    name: animalObj.name
+                });
+                addedCount++;
+            }
+        }
+    }
+
+    if (addedCount > 0) {
+        saveHistoryData();
+        renderAllViews();
+        alert(`¡Se inyectaron exactamente ${addedCount} sorteo(s) sin duplicar!`);
+    } else {
+        alert('No se agregaron nuevos sorteos. Los registros ya existían o el formato por pares no coincidió.');
+    }
+}
+
+// ==========================================
+// RENDERIZADO Y CONTROL DE VISTAS
+// ==========================================
 function renderAllViews() {
     const mhe = computeMHEModel(drawHistory);
     
@@ -463,112 +513,40 @@ async function readClipboardAndProcess() {
     }
 }
 
-// Función auxiliar para estandarizar horas (ej: "8:00 am" -> "08:00 AM")
-function normalizeTimeStr(timeStr) {
-    if (!timeStr) return "12:00 PM";
-    let t = timeStr.trim().toUpperCase();
-    // Insertar cero inicial si tiene 7 caracteres (ej: "8:00 AM" -> "08:00 AM")
-    if (/^\d:[0-5]\d\s*(AM|PM)$/.test(t)) {
-        t = "0" + t;
-    }
-    return t;
+function processRawImportText() {
+    const raw = document.getElementById('raw-import-textarea').value.trim();
+    if (!raw) return;
+    parseAndInjectRawText(raw);
+    document.getElementById('raw-import-textarea').value = '';
 }
 
-function parseAndInjectRawText(rawText) {
-    let addedCount = 0;
-    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const defaultDate = document.getElementById('input-draw-date').value || new Date().toISOString().split('T')[0];
+const formInjector = document.getElementById('draw-injector-form');
+if (formInjector) {
+    formInjector.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const date = document.getElementById('input-draw-date').value;
+        const time = document.getElementById('input-draw-time').value;
+        const num = document.getElementById('input-draw-animal').value;
+        const norm = normalizeNumStr(num);
+        const animalObj = animalMap[norm] || animalMap[num] || { name: 'Desconocido' };
 
-    let pendingNum = null;
-    let pendingName = null;
-    let pendingTime = null;
+        drawHistory.push({
+            id: Date.now(),
+            date: date,
+            time: time,
+            num: num,
+            name: animalObj.name
+        });
 
-    lines.forEach(line => {
-        const timeMatch = line.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
-        const numMatch = line.match(/\b(00|0|[1-9]|[1-6][0-9]|7[0-5])\b/);
-
-        // Caso 1: La línea contiene AMBOS (Hora y Animal en la misma línea)
-        if (timeMatch && numMatch) {
-            let num = numMatch[1];
-            let time = normalizeTimeStr(timeMatch[0]);
-            let norm = normalizeNumStr(num);
-            let animalObj = animalMap[norm] || animalMap[num] || { name: 'Desconocido' };
-
-            injectSingleRecord(defaultDate, time, num, norm, animalObj.name);
-            pendingNum = null;
-            pendingTime = null;
-        } 
-        // Caso 2: La línea es solo una HORA
-        else if (timeMatch) {
-            let time = normalizeTimeStr(timeMatch[0]);
-            if (pendingNum !== null) {
-                // Tenemos número acumulado -> Inyectar par
-                let norm = normalizeNumStr(pendingNum);
-                let animalObj = animalMap[norm] || animalMap[pendingNum] || { name: pendingName || 'Desconocido' };
-                injectSingleRecord(defaultDate, time, pendingNum, norm, animalObj.name);
-                pendingNum = null;
-                pendingName = null;
-            } else {
-                pendingTime = time;
-            }
-        } 
-        // Caso 3: La línea es solo NÚMERO / ANIMAL
-        else if (numMatch) {
-            let num = numMatch[1];
-            let name = line.replace(num, '').trim();
-            if (pendingTime !== null) {
-                // Tenemos hora acumulada -> Inyectar par
-                let norm = normalizeNumStr(num);
-                let animalObj = animalMap[norm] || animalMap[num] || { name: name || 'Desconocido' };
-                injectSingleRecord(defaultDate, pendingTime, num, norm, animalObj.name);
-                pendingTime = null;
-            } else {
-                pendingNum = num;
-                pendingName = name;
-            }
-        }
-    });
-
-    function injectSingleRecord(date, time, rawNum, normNum, name) {
-        // Validación Anti-Duplicado Estricta sobre Hora Normalizada, Fecha y Número
-        const exists = drawHistory.some(h => 
-            h.date === date && 
-            normalizeTimeStr(h.time) === time && 
-            normalizeNumStr(h.num) === normNum
-        );
-
-        if (!exists) {
-            drawHistory.push({
-                id: Date.now() + Math.random(),
-                date: date,
-                time: time,
-                num: rawNum,
-                name: name
-            });
-            addedCount++;
-        }
-    }
-
-    if (addedCount > 0) {
         saveHistoryData();
         renderAllViews();
-        alert(`¡Se inyectaron ${addedCount} sorteo(s) sin duplicados!`);
-    } else {
-        alert('No se agregaron nuevos sorteos. Todos los registros pegados ya existen en el historial.');
-    }
+    });
 }
 
 function deleteDrawRecord(id) {
     drawHistory = drawHistory.filter(h => h.id !== id);
     saveHistoryData();
     renderAllViews();
-}
-
-function processRawImportText() {
-    const raw = document.getElementById('raw-import-textarea').value.trim();
-    if (!raw) return;
-    parseAndInjectRawText(raw);
-    document.getElementById('raw-import-textarea').value = '';
 }
 
 function exportDatabaseJSON() {
