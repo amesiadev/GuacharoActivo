@@ -463,70 +463,99 @@ async function readClipboardAndProcess() {
     }
 }
 
+// Función auxiliar para estandarizar horas (ej: "8:00 am" -> "08:00 AM")
+function normalizeTimeStr(timeStr) {
+    if (!timeStr) return "12:00 PM";
+    let t = timeStr.trim().toUpperCase();
+    // Insertar cero inicial si tiene 7 caracteres (ej: "8:00 AM" -> "08:00 AM")
+    if (/^\d:[0-5]\d\s*(AM|PM)$/.test(t)) {
+        t = "0" + t;
+    }
+    return t;
+}
+
 function parseAndInjectRawText(rawText) {
     let addedCount = 0;
-    const lines = rawText.split('\n');
+    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     const defaultDate = document.getElementById('input-draw-date').value || new Date().toISOString().split('T')[0];
 
-    lines.forEach(line => {
-        if (!line.trim()) return;
+    let pendingNum = null;
+    let pendingName = null;
+    let pendingTime = null;
 
+    lines.forEach(line => {
         const timeMatch = line.match(/(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)/i);
         const numMatch = line.match(/\b(00|0|[1-9]|[1-6][0-9]|7[0-5])\b/);
 
-        if (numMatch) {
+        // Caso 1: La línea contiene AMBOS (Hora y Animal en la misma línea)
+        if (timeMatch && numMatch) {
             let num = numMatch[1];
+            let time = normalizeTimeStr(timeMatch[0]);
             let norm = normalizeNumStr(num);
-            let time = timeMatch ? timeMatch[0].toUpperCase() : '12:00 PM';
-            if (time.length === 7) time = '0' + time;
-
             let animalObj = animalMap[norm] || animalMap[num] || { name: 'Desconocido' };
 
-            const exists = drawHistory.some(h => h.date === defaultDate && h.time === time && normalizeNumStr(h.num) === norm);
-
-            if (!exists) {
-                drawHistory.push({
-                    id: Date.now() + Math.random(),
-                    date: defaultDate,
-                    time: time,
-                    num: num,
-                    name: animalObj.name
-                });
-                addedCount++;
+            injectSingleRecord(defaultDate, time, num, norm, animalObj.name);
+            pendingNum = null;
+            pendingTime = null;
+        } 
+        // Caso 2: La línea es solo una HORA
+        else if (timeMatch) {
+            let time = normalizeTimeStr(timeMatch[0]);
+            if (pendingNum !== null) {
+                // Tenemos número acumulado -> Inyectar par
+                let norm = normalizeNumStr(pendingNum);
+                let animalObj = animalMap[norm] || animalMap[pendingNum] || { name: pendingName || 'Desconocido' };
+                injectSingleRecord(defaultDate, time, pendingNum, norm, animalObj.name);
+                pendingNum = null;
+                pendingName = null;
+            } else {
+                pendingTime = time;
+            }
+        } 
+        // Caso 3: La línea es solo NÚMERO / ANIMAL
+        else if (numMatch) {
+            let num = numMatch[1];
+            let name = line.replace(num, '').trim();
+            if (pendingTime !== null) {
+                // Tenemos hora acumulada -> Inyectar par
+                let norm = normalizeNumStr(num);
+                let animalObj = animalMap[norm] || animalMap[num] || { name: name || 'Desconocido' };
+                injectSingleRecord(defaultDate, pendingTime, num, norm, animalObj.name);
+                pendingTime = null;
+            } else {
+                pendingNum = num;
+                pendingName = name;
             }
         }
     });
 
+    function injectSingleRecord(date, time, rawNum, normNum, name) {
+        // Validación Anti-Duplicado Estricta sobre Hora Normalizada, Fecha y Número
+        const exists = drawHistory.some(h => 
+            h.date === date && 
+            normalizeTimeStr(h.time) === time && 
+            normalizeNumStr(h.num) === normNum
+        );
+
+        if (!exists) {
+            drawHistory.push({
+                id: Date.now() + Math.random(),
+                date: date,
+                time: time,
+                num: rawNum,
+                name: name
+            });
+            addedCount++;
+        }
+    }
+
     if (addedCount > 0) {
         saveHistoryData();
         renderAllViews();
-        alert(`¡Se inyectaron ${addedCount} sorteo(s) nuevos exitosamente!`);
+        alert(`¡Se inyectaron ${addedCount} sorteo(s) sin duplicados!`);
     } else {
-        alert('No se encontraron registros nuevos válidos para agregar.');
+        alert('No se agregaron nuevos sorteos. Todos los registros pegados ya existen en el historial.');
     }
-}
-
-const formInjector = document.getElementById('draw-injector-form');
-if (formInjector) {
-    formInjector.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const date = document.getElementById('input-draw-date').value;
-        const time = document.getElementById('input-draw-time').value;
-        const num = document.getElementById('input-draw-animal').value;
-        const norm = normalizeNumStr(num);
-        const animalObj = animalMap[norm] || animalMap[num] || { name: 'Desconocido' };
-
-        drawHistory.push({
-            id: Date.now(),
-            date: date,
-            time: time,
-            num: num,
-            name: animalObj.name
-        });
-
-        saveHistoryData();
-        renderAllViews();
-    });
 }
 
 function deleteDrawRecord(id) {
