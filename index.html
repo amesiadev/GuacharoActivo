@@ -620,6 +620,8 @@
             return numStr.length === 2 ? numStr.charAt(0) : "0";
         }
 
+                
+
                 function computeMHEModel(history) {
             if (history.length < 3) return null;
 
@@ -627,7 +629,6 @@
             const lastState = history[n - 1].num;
             const prevLastState = history[n - 2].num;
             
-            // Obtener los últimos 2 números para aplicar penalización estricta de repetición
             const ultimo = lastState;
             const anteultimo = prevLastState;
 
@@ -655,8 +656,9 @@
                 }
             }
 
+            // Conteo de fatiga por decenas (últimos 12 sorteos para mayor sensibilidad horaria)
             const decenasCount = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0, '7':0 };
-            const recentSlice = history.slice(-10);
+            const recentSlice = history.slice(-12);
             recentSlice.forEach(item => {
                 const d = getDecenaGroup(item.num);
                 if (decenasCount[d] !== undefined) decenasCount[d]++;
@@ -678,24 +680,32 @@
                 const dec = getDecenaGroup(num);
                 const term = num.slice(-1);
 
+                // Opción 3: Simetría de espejos modulares y terminales
                 let mirrorBonus = 0;
-                if (term === lastTerminal) mirrorBonus += 6;
-                if (Math.abs(parseInt(dec) - parseInt(lastDecena)) === 1) mirrorBonus += 4;
+                if (term === lastTerminal) mirrorBonus += 15; // Coincidencia de terminal
+                if (Math.abs(parseInt(dec) - parseInt(lastDecena)) === 1) mirrorBonus += 10; // Transición adyacente de decena
 
+                // Opción 2: Distribución de Poisson por fatiga horaria/decenas
                 const decFatigue = decenasCount[dec] || 0;
-                const poissonMult = decFatigue > 4 ? 0.5 : (decFatigue === 0 ? 1.5 : 1.0);
-
-                let score = ((m2W * 35) + (m1W * 20) + (baseFreq * 8) + mirrorBonus) * poissonMult;
-
-                // CORRECCIÓN CRÍTICIA: Penalización drástica por repetición inmediata
-                if (num === ultimo) {
-                    score -= 50.0; // Castiga fuertemente el número que acaba de salir
-                } else if (num === anteultimo) {
-                    score -= 25.0; // Castiga al penúltimo
+                let poissonMult = 1.0;
+                if (decFatigue >= 4) {
+                    poissonMult = 0.5; // Penaliza decenas sobreexpuestas
+                } else if (decFatigue === 0) {
+                    poissonMult = 1.6; // Premia decenas frías o ausentes
                 }
 
-                // Ruido estocástico controlado para romper empates y forzar rotación
-                score += Math.random() * 5.0;
+                // Opción 1: Calibración ponderada de Markov de 2do orden + Frecuencia
+                let score = ((m2W * 40) + (m1W * 25) + (baseFreq * 10) + mirrorBonus) * poissonMult;
+
+                // Penalización estricta antirrepetición en cascada
+                if (num === ultimo) {
+                    score -= 60.0; // Castigo severo al último número
+                } else if (num === anteultimo) {
+                    score -= 30.0; // Castigo moderado al penúltimo
+                }
+
+                // Ruido estocástico controlado para evitar estancamiento y empates mecánicos
+                score += Math.random() * 4.0;
 
                 candidates.push({
                     num: num,
