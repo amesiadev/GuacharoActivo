@@ -1,9 +1,11 @@
 // ==========================================
 // CONFIGURACIÓN DE LA TÓMBOLA OFICIAL (00-75)
 // ==========================================
+
+// TÓMBOLA OFICIAL CORREGIDA (00 = Ballena, 0 = Delfín)
 const DEFAULT_ANIMALS = [
-    { num: "00", name: "Delfín", icon: "fa-water" },
-    { num: "0", name: "Ballena", icon: "fa-fish" },
+    { num: "00", name: "Ballena", icon: "fa-fish" },
+    { num: "0", name: "Delfín", icon: "fa-water" },
     { num: "01", name: "Carnero", icon: "fa-paw" },
     { num: "02", name: "Toro", icon: "fa-shield-cat" },
     { num: "03", name: "Ciempiés", icon: "fa-bug" },
