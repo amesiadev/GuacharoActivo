@@ -565,9 +565,19 @@
             rebuildAnimalMap();
         }
 
+        // 1. Reconstruir el mapa de animales normalizando los ceros a la izquierda
         function rebuildAnimalMap() {
             animalMap = {};
-            animalsList.forEach(a => animalMap[a.num] = a);
+            animalsList.forEach(a => {
+                // Guardar la clave tal cual y también normalizada a 2 dígitos para evitar desajustes
+                animalMap[a.num] = a;
+                let cleanNum = a.num;
+                if (cleanNum.length === 1 && cleanNum !== "0") {
+                    animalMap["0" + cleanNum] = a;
+                } else if (cleanNum === "0") {
+                    animalMap["00"] = a;
+                }
+            });
         }
 
         function saveCustomAnimalsTable() {
@@ -955,27 +965,52 @@
             dlAnchorElem.click();
         }
 
+        // 2. Importador de JSON con normalización estricta de registros
         function importDatabaseJSON(event) {
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if (parsed.history && Array.isArray(parsed.history)) {
-                        drawHistory = parsed.history;
-                        if (parsed.animals) animalsList = parsed.animals;
+                    const rawData = parsed.history || parsed.historial;
+                    
+                    if (rawData && Array.isArray(rawData)) {
+                        // Normalizar cada registro importado para que el número y nombre coincidan con la tómbola
+                        drawHistory = rawData.map(item => {
+                            let numStr = String(item.num).trim();
+                            // Estandarizar formato de número
+                            if (numStr.length === 1 && numStr !== "0") numStr = "0" + numStr;
+                            if (numStr === "0") numStr = "00";
+
+                            const foundAnimal = animalMap[numStr] || animalMap[String(parseInt(numStr, 10))] || { name: item.animal || 'Desconocido' };
+
+                            return {
+                                id: item.id || (Date.now() + Math.random()),
+                                date: item.date || item.timestamp?.split(' ')[0] || new Date().toISOString().split('T')[0],
+                                time: item.time || item.timestamp?.split(' ')[1] + ' ' + (item.timestamp?.split(' ')[2] || '') || '12:00 PM',
+                                num: numStr,
+                                name: foundAnimal.name
+                            };
+                        });
+
+                        if (parsed.animals && Array.isArray(parsed.animals)) {
+                            animalsList = parsed.animals;
+                        }
+                        
                         rebuildAnimalMap();
                         saveHistoryData();
-                        saveCustomAnimalsTable();
                         renderAllViews();
-                        alert('¡Base de datos JSON importada con éxito!');
+                        alert(`¡Base de datos cargada con éxito! Se sincronizaron ${drawHistory.length} registros perfectamente.`);
+                    } else {
+                        alert('El archivo JSON no contiene un historial válido.');
                     }
                 } catch(err) {
-                    alert('Error al leer el archivo JSON.');
+                    console.error(err);
+                    alert('Error al procesar el archivo JSON.');
                 }
             };
             fileReader.readAsText(event.target.files[0]);
         }
-
+        
         function runBacktestAudit() {
             const selectElem = document.getElementById('backtest-window-select');
             if (!selectElem) return;
