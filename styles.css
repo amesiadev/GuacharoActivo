@@ -53,13 +53,14 @@ h1 {
     font-size: 0.9rem;
 }
 
-.input-group input {
+.input-group input, .input-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #bdc3c7;
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 1rem;
+    background-color: #fff;
 }
 
 button {
@@ -107,11 +108,12 @@ button:hover {
     font-family: monospace;
     white-space: pre;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     background: #f8f9f9;
     padding: 10px;
     border-radius: 5px;
     overflow-x: auto;
+    line-height: 1.4;
 }
 
 .highlight-text {
@@ -119,6 +121,7 @@ button:hover {
     color: var(--accent-color);
     text-align: center;
     margin-top: 8px;
+    font-size: 0.95rem;
 }
 
 .attraction-list {
