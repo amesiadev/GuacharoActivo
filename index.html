@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora Guácharo Activo</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <header class="app-header">
             <h1>Guácharo Activo</h1>
-            <p>Sistema de Cálculo: Pirámide & Ley de Atracción</p>
+            <p>Proyección por Pirámide & Ley de Atracción</p>
         </header>
 
         <main class="card">
@@ -41,28 +41,28 @@
             </div>
 
             <div class="input-group">
-                <label for="anteriorInput">Resultado Anterior (Animalito / Número 00-75)</label>
-                <input type="text" id="anteriorInput" placeholder="Ej. 23 Cebra" autocomplete="off">
+                <label for="anteriorSelect">Resultado Anterior (Tabla Oficial 0 - 75)</label>
+                <select id="anteriorSelect"></select>
             </div>
 
-            <button id="calcularBtn" class="primary-btn">Generar Pronóstico</button>
+            <button id="calcularBtn" class="primary-btn">Calcular Jugadas</button>
         </main>
 
         <section id="resultados" class="results-container hidden">
-            <div class="result-card">
-                <h3>Método de la Pirámide</h3>
-                <div id="piramideOutput" class="pyramid-box"></div>
-                <p id="reduccionFinal" class="pyramid-footer"></p>
+            <div class="result-card highlight-card">
+                <h3>Jugadas Recomendadas — <span id="lblHoraSorteo"></span></h3>
+                <div id="jugadasGrid" class="plays-grid"></div>
             </div>
 
             <div class="result-card">
-                <h3>Ley de Atracción / Jaladera</h3>
+                <h3>Desglose de Ley de Atracción (Jaladera)</h3>
                 <ul id="atraccionList" class="attraction-list"></ul>
             </div>
 
-            <div class="result-card highlight-card">
-                <h3>Jugada Maestra — <span id="lblHoraSorteo"></span></h3>
-                <div id="finalOutput" class="final-badge"></div>
+            <div class="result-card">
+                <h3>Estructura de la Pirámide</h3>
+                <div id="piramideOutput" class="pyramid-box"></div>
+                <p id="reduccionFinal" class="pyramid-footer"></p>
             </div>
         </section>
     </div>
