@@ -22,7 +22,7 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 480px;
+    max-width: 500px;
 }
 
 .app-header {
@@ -35,7 +35,6 @@ body {
     font-weight: 700;
     margin: 0;
     color: var(--text-main);
-    letter-spacing: -0.025em;
 }
 
 .app-header p {
@@ -50,7 +49,7 @@ body {
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .input-grid {
@@ -63,13 +62,9 @@ body {
     margin-bottom: 16px;
 }
 
-.input-group:last-of-type {
-    margin-bottom: 20px;
-}
-
 .input-group label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 6px;
@@ -79,14 +74,14 @@ body {
 
 .input-group input, .input-group select {
     width: 100%;
-    padding: 10px 14px;
+    padding: 11px 12px;
     background-color: #0f172a;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     color: var(--text-main);
     font-size: 0.95rem;
     box-sizing: border-box;
-    transition: border-color 0.2s;
+    cursor: pointer;
 }
 
 .input-group input:focus, .input-group select:focus {
@@ -96,7 +91,7 @@ body {
 
 .primary-btn {
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     background-color: var(--accent);
     color: #0f172a;
     border: none;
@@ -120,35 +115,71 @@ body {
 }
 
 .result-card h3 {
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     color: var(--accent);
-    margin: 0 0 12px 0;
+    margin: 0 0 14px 0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
 }
 
-.pyramid-box {
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre;
-    text-align: center;
-    font-size: 1rem;
-    background-color: #0f172a;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    overflow-x: auto;
-    letter-spacing: 2px;
-    color: #38bdf8;
+.highlight-card {
+    border-color: var(--accent);
 }
 
-.pyramid-footer {
-    font-size: 0.85rem;
+.plays-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.play-item {
+    background-color: #0f172a;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.play-item.fijo {
+    border-left: 4px solid var(--accent);
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, rgba(15, 23, 42, 1) 100%);
+}
+
+.play-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.play-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: #334155;
+    color: var(--text-main);
+}
+
+.play-item.fijo .play-tag {
+    background-color: var(--accent);
+    color: #0f172a;
+}
+
+.play-animal {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.play-reason {
+    font-size: 0.83rem;
     color: var(--text-muted);
-    text-align: center;
-    margin: 10px 0 0 0;
+    margin: 0;
+    line-height: 1.4;
 }
 
 .attraction-list {
@@ -163,25 +194,31 @@ body {
     margin-bottom: 8px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    line-height: 1.4;
 }
 
 .attraction-list li:last-child {
     margin-bottom: 0;
 }
 
-.highlight-card {
-    border-color: var(--accent);
+.pyramid-box {
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre;
+    text-align: center;
+    font-size: 0.95rem;
+    background-color: #0f172a;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    letter-spacing: 2px;
+    color: #38bdf8;
 }
 
-.final-badge {
+.pyramid-footer {
+    font-size: 0.85rem;
+    color: var(--text-muted);
     text-align: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #f8fafc;
-    background: linear-gradient(135deg, #1e293b, #334155);
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    line-height: 1.5;
+    margin: 10px 0 0 0;
 }
