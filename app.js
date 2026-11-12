@@ -22,7 +22,6 @@ function ejecutarCalculo() {
     const mes = partesFecha[1];
     const dia = partesFecha[2];
     
-    // Base de la pirámide: Fecha + Anterior
     let baseString = `${dia}${mes}${anioCorto}${anteriorStr}`.replace(/\D/g, '');
     let fila = baseString.split('').map(Number);
 
@@ -67,8 +66,7 @@ function ejecutarCalculo() {
     // Mostrar resultados en pantalla
     document.getElementById('lblHoraSorteo').textContent = horaSorteo;
     document.getElementById('finalOutput').innerHTML = `
-        Número Principal: <strong>${principalStr}</strong><br>
-        <span style="font-size: 0.85rem; font-weight: normal;">(Atracción y validación en rango 00-75)</span>
+        Número Principal: <span style="color: var(--accent);">${principalStr}</span>
     `;
 
     document.getElementById('resultados').classList.remove('hidden');
