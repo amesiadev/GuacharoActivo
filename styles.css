@@ -176,11 +176,12 @@ body {
 
 .final-badge {
     text-align: center;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #f8fafc;
     background: linear-gradient(135deg, #1e293b, #334155);
     padding: 16px;
     border-radius: 8px;
     border: 1px solid var(--accent);
+    line-height: 1.5;
 }
