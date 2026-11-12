@@ -18,7 +18,23 @@
             </div>
 
             <div class="input-group">
-                <label for="anteriorInput">Resultado Anterior (Ej: 23 Cebra):</label>
+                <label for="horaInput">Próximo Sorteo (Hora):</label>
+                <select id="horaInput">
+                    <option value="09:00 AM">09:00 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="01:00 PM" selected>01:00 PM</option>
+                    <option value="03:00 PM">03:00 PM</option>
+                    <option value="04:00 PM">04:00 PM</option>
+                    <option value="05:00 PM">05:00 PM</option>
+                    <option value="06:00 PM">06:00 PM</option>
+                    <option value="07:00 PM">07:00 PM</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="anteriorInput">Resultado Anterior (Ej: 23):</label>
                 <input type="text" id="anteriorInput" placeholder="Ej. 23" maxlength="2">
             </div>
 
@@ -38,7 +54,7 @@
             </div>
 
             <div class="section final-pick">
-                <h3>Selección Final (1:00 PM)</h3>
+                <h3>Selección Final para las <span id="lblHoraSorteo"></span></h3>
                 <div id="finalOutput" class="final-badge"></div>
             </div>
         </div>
