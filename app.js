@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function ejecutarCalculo() {
     const fechaStr = document.getElementById('fechaInput').value;
+    const horaSorteo = document.getElementById('horaInput').value;
     const anteriorStr = document.getElementById('anteriorInput').value.trim();
 
     if (!fechaStr || !anteriorStr) {
@@ -15,61 +16,59 @@ function ejecutarCalculo() {
         return;
     }
 
-    // Procesar fecha formato DDMMYY o YYYY-MM-DD
+    // 1. Procesar fecha (DDMMAA) y unir con resultado anterior
     const partesFecha = fechaStr.split('-'); // [YYYY, MM, DD]
     const anioCorto = partesFecha[0].slice(-2);
     const mes = partesFecha[1];
     const dia = partesFecha[2];
     
-    // Base numérica: DD + MM + YY + Anteriormenente salido
+    // Base de la pirámide: Fecha + Anterior
     let baseString = `${dia}${mes}${anioCorto}${anteriorStr}`.replace(/\D/g, '');
     let fila = baseString.split('').map(Number);
 
-    let piramideHTML = '';
-    let filasPiramide = [fila.join('   ')];
+    let filasPiramide = [fila.join(' ')];
 
-    // Construcción de la pirámide numérica
+    // Construcción iterativa de la pirámide numérica
     while (fila.length > 2) {
         let nuevaFila = [];
         for (let i = 0; i < fila.length - 1; i++) {
             let suma = fila[i] + fila[i + 1];
-            nuevaFila.push(suma % 10); // Conservar solo la unidad
+            nuevaFila.push(suma % 10); // Solo la unidad
         }
         fila = nuevaFila;
-        // Agregar espacios para formatear visualmente en bloque centrado
-        let espacios = ' '.repeat(filasPiramide.length * 2);
-        filasPiramide.push(espacios + fila.join('   '));
+        filasPiramide.push(fila.join(' '));
     }
 
-    piramideHTML = filasPiramide.join('\n');
-    
-    // Reducción final (últimos dos números de la cúspide)
-    let ultimaFila = fila;
-    let reduccion = ultimaFila.join('');
-    let sumaFinal = ultimaFila.reduce((a, b) => a + b, 0);
-    let reduccionUnidad = sumaFinal >= 10 ? (sumaFinal % 10 + Math.floor(sumaFinal / 10)) : sumaFinal;
+    let piramideHTML = filasPiramide.join('\n');
+    let ultimaDecena = parseInt(fila.join(''), 10);
 
     document.getElementById('piramideOutput').textContent = piramideHTML;
-    document.getElementById('reduccionFinal').textContent = `Reducción base cierre: ${reduccion} (Suma total: ${sumaFinal})`;
+    document.getElementById('reduccionFinal').textContent = `Cierre de pirámide: ${ultimaDecena < 10 ? '0' + ultimaDecena : ultimaDecena}`;
 
-    // Ley de Atracción basada en el número anterior
+    // 2. Ley de Atracción (Jaladera)
     const numAnterior = parseInt(anteriorStr, 10);
-    const espejo = parseInt(anteriorStr.split('').reverse().join(''), 10);
-    const sumaDigitos = numAnterior < 10 ? numAnterior : Math.floor(numAnterior / 10) + (numAnterior % 10);
-    
+    const espejoStr = anteriorStr.split('').reverse().join('');
+    const espejo = parseInt(espejoStr, 10);
+    const terminal = numAnterior % 10;
+
     const atraccionList = document.getElementById('atraccionList');
     atraccionList.innerHTML = `
-        <li><strong>Espejo (Inverso):</strong> ${espejo < 10 ? '0' + espejo : espejo}</li>
-        <li><strong>Suma de dígitos:</strong> ${sumaDigitos < 10 ? '0' + sumaDigitos : sumaDigitos}</li>
-        <li><strong>Terminales afines (${numAnterior % 10}):</strong> ${numAnterior % 10}, ${10 + (numAnterior % 10)}, ${20 + (numAnterior % 10)}</li>
+        <li><strong>Espejo directo:</strong> ${espejo < 10 ? '0' + espejo : espejo}</li>
+        <li><strong>Terminal afín (${terminal}):</strong> ${terminal < 10 ? '0' + terminal : terminal}, ${10 + terminal}, ${20 + terminal}</li>
     `;
 
-    // Selección Final combinada dentro del rango 00-75
-    let principal = espejo <= 75 ? (espejo < 10 ? '0' + espejo : espejo) : (reduccion <= 75 ? reduccion : '32');
-    
+    // 3. Selección dentro del rango válido 00 - 75 de Guácharo Activo
+    let principal = espejo;
+    if (principal > 75) {
+        principal = ultimaDecena <= 75 ? ultimaDecena : numAnterior;
+    }
+    const principalStr = principal < 10 ? '0' + principal : principal;
+
+    // Mostrar resultados en pantalla
+    document.getElementById('lblHoraSorteo').textContent = horaSorteo;
     document.getElementById('finalOutput').innerHTML = `
-        Número Principal: <strong>${principal}</strong><br>
-        <span style="font-size: 0.85rem; font-weight: normal;">(Respaldado por simetría de espejo y pirámide)</span>
+        Número Principal: <strong>${principalStr}</strong><br>
+        <span style="font-size: 0.85rem; font-weight: normal;">(Atracción y validación en rango 00-75)</span>
     `;
 
     document.getElementById('resultados').classList.remove('hidden');
