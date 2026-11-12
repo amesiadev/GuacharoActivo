@@ -1,401 +1,48 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Analítico MHE - Guácharo Activo (00-75)</title>
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 900: '#064e3b' },
-                        dark: { 950: '#070a0f', 900: '#0b0f17', 800: '#111827', 700: '#1f2937', 600: '#374151' }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- CSS Separado -->
+    <title>Calculadora Guácharo Activo - Pirámide y Atracción</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+<body>
+    <div class="container">
+        <h1>Guácharo Activo</h1>
+        <p class="subtitle">Método de la Pirámide y Ley de Atracción</p>
 
-    <!-- HEADER SUPERIOR -->
-    <header class="border-b border-gray-800 bg-dark-900/90 sticky top-0 z-50 backdrop-blur">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-dark-950 font-black text-xl shadow-lg glow-emerald">
-                    G
-                </div>
-                <div>
-                    <h1 class="font-bold text-base sm:text-lg text-white tracking-wide flex items-center gap-2">
-                        GUÁCHARO MHE <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">00-75 PRO</span>
-                    </h1>
-                    <p class="text-[11px] text-gray-400">Motor Híbrido Estocástico (77 Nodos Completo)</p>
-                </div>
+        <div class="card">
+            <div class="input-group">
+                <label for="fechaInput">Fecha del Sorteo:</label>
+                <input type="date" id="fechaInput">
             </div>
 
-            <div class="hidden sm:flex items-center space-x-4 text-xs font-mono">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-gray-300">Base Activa: <strong id="global-sample-count" class="text-emerald-400">0</strong> sorteos</span>
-                </div>
-                <div class="h-4 w-px bg-gray-700"></div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-gray-400">Acierto W30:</span>
-                    <span id="global-win-rate" class="text-emerald-400 font-bold">0%</span>
-                </div>
+            <div class="input-group">
+                <label for="anteriorInput">Resultado Anterior (Ej: 23 Cebra):</label>
+                <input type="text" id="anteriorInput" placeholder="Ej. 23" maxlength="2">
             </div>
+
+            <button id="calcularBtn">Calcular Pronóstico</button>
         </div>
-    </header>
 
-    <!-- NAVEGACIÓN -->
-    <div class="border-b border-gray-800 bg-dark-900/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 overflow-x-auto py-2">
-            <button onclick="switchTab('tab-prediction')" id="btn-tab-prediction" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-crosshairs"></i> Pronóstico & Control Diario
-            </button>
-            <button onclick="switchTab('tab-markov')" id="btn-tab-markov" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-network-wired"></i> Matriz Markov (77x77)
-            </button>
-            <button onclick="switchTab('tab-data')" id="btn-tab-data" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-emerald-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-paste"></i> Ingesta Directa / Portapapeles
-            </button>
-            <button onclick="switchTab('tab-backtest')" id="btn-tab-backtest" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-chart-line"></i> Auditoría & Backtesting
-            </button>
-            <button onclick="switchTab('tab-table')" id="btn-tab-table" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-list-ol"></i> Tabla Oficial (00-75)
-            </button>
+        <div id="resultados" class="results-container hidden">
+            <div class="section">
+                <h3>Resultado de la Pirámide</h3>
+                <div id="piramideOutput" class="pyramid-box"></div>
+                <p id="reduccionFinal" class="highlight-text"></p>
+            </div>
+
+            <div class="section">
+                <h3>Ley de Atracción / Jaladera</h3>
+                <ul id="atraccionList" class="attraction-list"></ul>
+            </div>
+
+            <div class="section final-pick">
+                <h3>Selección Final (1:00 PM)</h3>
+                <div id="finalOutput" class="final-badge"></div>
+            </div>
         </div>
     </div>
-
-    <!-- CONTENIDO -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- PESTAÑA 1 -->
-        <section id="tab-prediction" class="space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <!-- Registro manual -->
-                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-plus-circle text-emerald-400"></i> Agregar Sorteo Único
-                            </h2>
-                            <span class="text-[11px] text-gray-400 font-mono" id="clock-display">--:--:--</span>
-                        </div>
-                        <form id="draw-injector-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">Fecha</label>
-                                <input type="date" id="input-draw-date" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Horario</label>
-                                    <select id="input-draw-time" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
-                                        <option value="08:00 AM">08:00 AM</option>
-                                        <option value="09:00 AM">09:00 AM</option>
-                                        <option value="10:00 AM">10:00 AM</option>
-                                        <option value="11:00 AM">11:00 AM</option>
-                                        <option value="12:00 PM">12:00 PM</option>
-                                        <option value="01:00 PM">01:00 PM</option>
-                                        <option value="02:00 PM">02:00 PM</option>
-                                        <option value="03:00 PM">03:00 PM</option>
-                                        <option value="04:00 PM">04:00 PM</option>
-                                        <option value="05:00 PM">05:00 PM</option>
-                                        <option value="06:00 PM">06:00 PM</option>
-                                        <option value="07:00 PM">07:00 PM</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Animalito (00-75)</label>
-                                    <select id="input-draw-animal" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none">
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-lg text-xs transition shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-plus"></i> Añadir al Bloque Actual
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="mt-4 pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400 font-mono">
-                        <span>Modo: <strong class="text-emerald-400">Exclusivo / Sobrescritura</strong></span>
-                        <button onclick="clearHistoryData()" class="text-rose-400 hover:underline">Limpiar Todo</button>
-                    </div>
-                </div>
-
-                <!-- Tarjeta Pronóstico -->
-                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between border-l-4 border-l-emerald-500 relative overflow-hidden">
-                    <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-crosshairs text-emerald-400"></i> Pronóstico de Selección Única MHE
-                                </h2>
-                                <p class="text-[11px] text-gray-400">Estrategia Estricta Sin Coberturas (Single Choice - 100% Target)</p>
-                            </div>
-                            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full text-[10px] font-mono font-bold uppercase">
-                                Modo Único Activo
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-2">
-                            <div class="bg-dark-900/90 border border-emerald-500/50 rounded-xl p-4 flex items-center justify-between shadow-inner">
-                                <div>
-                                    <span class="text-[10px] font-mono text-emerald-400 font-bold block uppercase">Eje de Pronóstico</span>
-                                    <div class="text-4xl font-extrabold text-white font-mono mt-1" id="pred-num">--</div>
-                                    <div class="text-xs text-gray-300 font-semibold" id="pred-name">Esperando datos...</div>
-                                </div>
-                                <div class="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl text-emerald-400" id="pred-icon">
-                                    <i class="fa-solid fa-gem"></i>
-                                </div>
-                            </div>
-
-                            <div class="bg-dark-900/60 border border-gray-800 rounded-xl p-4 flex flex-col justify-between">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs text-gray-400">Confianza Estocástica</span>
-                                    <span class="text-xs font-mono text-emerald-400 font-bold" id="pred-confidence">0.0%</span>
-                                </div>
-                                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden my-2">
-                                    <div id="pred-confidence-bar" class="bg-emerald-400 h-full w-0 transition-all duration-500"></div>
-                                </div>
-                                <div class="text-[11px] text-gray-400 flex justify-between font-mono">
-                                    <span>Markov St-1: <strong id="pred-markov-weight" class="text-white">--</strong></span>
-                                    <span>Poisson: <strong id="pred-poisson-mult" class="text-white">--</strong></span>
-                                </div>
-                            </div>
-
-                            <div class="bg-dark-900/60 border border-gray-800 rounded-xl p-4 flex flex-col justify-between">
-                                <span class="text-xs text-gray-400">Vector de Entrada ($S_{t-2} \rightarrow S_{t-1}$)</span>
-                                <div class="text-xs font-mono text-emerald-300 font-bold my-1" id="pred-input-vector">
-                                    -- &rarr; --
-                                </div>
-                                <span class="text-[10px] text-gray-500">Evaluado en base activa pura</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Secuencia Activa -->
-                    <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs overflow-x-auto">
-                        <span class="text-gray-400 font-mono text-[11px] whitespace-nowrap mr-2">Secuencia Inyectada:</span>
-                        <div class="flex items-center gap-1.5 font-mono overflow-x-auto py-1" id="recent-chips-container">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Fatiga y Tabla -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-panel p-5 rounded-2xl shadow-xl">
-                    <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-emerald-400"></i> Presión / Fatiga por Decenas
-                    </h3>
-                    <div class="space-y-2.5" id="decenas-container">
-                    </div>
-                </div>
-
-                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Registro de Bloque Activo
-                            </h3>
-                            <span class="text-[11px] text-gray-400 font-mono" id="daily-table-count">0 sorteos</span>
-                        </div>
-                        <div class="overflow-y-auto max-h-64">
-                            <table class="w-full text-left text-xs font-mono">
-                                <thead class="bg-dark-900 text-gray-400 sticky top-0">
-                                    <tr>
-                                        <th class="p-2">Fecha</th>
-                                        <th class="p-2">Hora</th>
-                                        <th class="p-2">Número</th>
-                                        <th class="p-2">Animal</th>
-                                        <th class="p-2 text-right">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="daily-table-body" class="divide-y divide-gray-800/50 text-gray-300">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 2 -->
-        <section id="tab-markov" class="hidden space-y-6">
-            <div class="glass-panel p-5 rounded-2xl shadow-xl">
-                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
-                    <div>
-                        <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-network-wired text-emerald-400"></i> Matriz de Transición Markov (2º Grado)
-                        </h2>
-                        <p class="text-xs text-gray-400">Top candidatos calculados sobre las 77 posiciones de Guácharo Activo</p>
-                    </div>
-                    <div class="text-xs font-mono bg-dark-900 px-3 py-1.5 rounded-lg border border-gray-800" id="markov-current-vector">
-                        Vector: --
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs font-mono">
-                        <thead class="bg-dark-900 text-gray-400 uppercase">
-                            <tr>
-                                <th class="p-3">Rank / Número</th>
-                                <th class="p-3">Animalito</th>
-                                <th class="p-3">Markov (2º Grado)</th>
-                                <th class="p-3">Markov (1º Grado)</th>
-                                <th class="p-3">Mult. Poisson</th>
-                                <th class="p-3 text-right">Puntaje Estocástico</th>
-                            </tr>
-                        </thead>
-                        <tbody id="markov-matrix-tbody" class="divide-y divide-gray-800 text-gray-200">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 3 -->
-        <section id="tab-data" class="hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-paste text-emerald-400"></i> Ingesta 1-Clic (Reemplazo Directo)
-                        </h2>
-                        <p class="text-xs text-gray-400 mb-4">
-                            Pega los 7 bloques de resultados de la jornada. Al procesar, **se borrará cualquier dato viejo** para garantizar un cálculo 100% puro.
-                        </p>
-                        <button onclick="readClipboardAndProcess()" class="w-full py-3 mb-4 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-xl text-xs transition shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-paste text-base"></i> Pegar y Sobrescribir (1-Clic)
-                        </button>
-                        <textarea id="raw-import-textarea" rows="6" placeholder="28 Zamuro&#10;08:00 AM&#10;5 Leon&#10;09:00 AM&#10;60 Camaleon&#10;10:00 AM..." class="w-full bg-dark-900 border border-gray-700 rounded-xl p-3 text-xs text-gray-200 font-mono focus:border-emerald-500 focus:outline-none"></textarea>
-                    </div>
-
-                    <div class="mt-4 flex gap-3">
-                        <button onclick="processRawImportText()" class="flex-1 py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-bold rounded-lg text-xs transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-rotate text-emerald-400"></i> Procesar Texto y Reemplazar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-database text-emerald-400"></i> Copia de Seguridad JSON
-                        </h2>
-                        <p class="text-xs text-gray-400 mb-4">
-                            Respalda tus bloques activos o importa archivos guardados.
-                        </p>
-
-                        <div class="space-y-3">
-                            <button onclick="exportDatabaseJSON()" class="w-full py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-semibold rounded-lg text-xs transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-download text-emerald-400"></i> Exportar BD Activa (JSON)
-                            </button>
-                            <label class="w-full py-2.5 bg-dark-900 hover:bg-gray-800 border border-gray-700 text-gray-200 font-semibold rounded-lg text-xs transition flex items-center justify-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-upload text-emerald-400"></i> Importar Archivo JSON
-                                <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importDatabaseJSON(event)">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-3 border-t border-gray-800 text-xs text-gray-500 font-mono">
-                        Estado BD: <strong class="text-emerald-400">Exclusiva (Sin Duplicados)</strong>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 4 -->
-        <section id="tab-backtest" class="hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-panel p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-microscope text-emerald-400"></i> Auditoría MHE
-                            </h2>
-                            <select id="backtest-window-select" onchange="runBacktestAudit()" class="bg-dark-900 border border-gray-700 text-xs text-gray-300 rounded px-2.5 py-1 font-mono focus:outline-none">
-                                <option value="5">Últimos 5 sorteos</option>
-                                <option value="10" selected>Últimos 10 sorteos</option>
-                            </select>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="bg-dark-900 p-4 rounded-xl border border-gray-800 text-center">
-                                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Tasa de Acierto (Opción Única)</span>
-                                <div class="text-4xl font-extrabold font-mono text-emerald-400 my-1" id="audit-rate">0.0%</div>
-                                <div class="text-xs text-gray-400" id="audit-detail-text">0 aciertos evaluados</div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3 text-xs font-mono">
-                                <div class="bg-dark-900/60 p-3 rounded-lg border border-gray-800">
-                                    <span class="text-gray-400 block text-[10px]">Racha Negativa</span>
-                                    <strong class="text-rose-400 text-sm" id="audit-max-loss">0</strong>
-                                </div>
-                                <div class="bg-dark-900/60 p-3 rounded-lg border border-gray-800">
-                                    <span class="text-gray-400 block text-[10px]">Consecutivos</span>
-                                    <strong class="text-emerald-400 text-sm" id="audit-max-win">0</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-5 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-area text-emerald-400"></i> Curva de Rendimiento Histórico (%)
-                        </h2>
-                        <div class="w-full h-56 bg-dark-900/60 rounded-xl p-3 border border-gray-800">
-                            <canvas id="audit-canvas" class="w-full h-full block"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 5 -->
-        <section id="tab-table" class="hidden space-y-6">
-            <div class="glass-panel p-5 rounded-2xl shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-list-ol text-emerald-400"></i> Tabla Oficial Guácharo Activo (77 Nodos)
-                        </h2>
-                        <p class="text-xs text-gray-400">Edita los nombres oficiales si ocurriesen cambios de lotería.</p>
-                    </div>
-                    <button onclick="saveCustomAnimalsTable()" class="py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-dark-950 font-bold rounded-lg text-xs transition flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[600px] overflow-y-auto pr-1" id="animals-grid-container">
-                </div>
-            </div>
-        </section>
-
-    </main>
 
     <script src="app.js"></script>
 </body>
