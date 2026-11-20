@@ -1,223 +1,167 @@
-// Tabla Oficial Exacta de Guácharo Activo (0, 00 hasta el 75)
-const listaAnimalitos = [
-    { num: "0", nombre: "Delfín" },
-    { num: "00", nombre: "Ballena" },
-    { num: "01", nombre: "Carnero" },
-    { num: "02", nombre: "Toro" },
-    { num: "03", nombre: "Ciempiés" },
-    { num: "04", nombre: "Alacrán" },
-    { num: "05", nombre: "León" },
-    { num: "06", nombre: "Rana" },
-    { num: "07", nombre: "Perico" },
-    { num: "08", nombre: "Ratón" },
-    { num: "09", nombre: "Águila" },
-    { num: "10", nombre: "Tigre" },
-    { num: "11", nombre: "Gato" },
-    { num: "12", nombre: "Caballo" },
-    { num: "13", nombre: "Mono" },
-    { num: "14", nombre: "Paloma" },
-    { num: "15", nombre: "Zorro" },
-    { num: "16", nombre: "Oso" },
-    { num: "17", nombre: "Pavo" },
-    { num: "18", nombre: "Burro" },
-    { num: "19", nombre: "Chivo" },
-    { num: "20", nombre: "Cochino" },
-    { num: "21", nombre: "Gallo" },
-    { num: "22", nombre: "Camello" },
-    { num: "23", nombre: "Cebra" },
-    { num: "24", nombre: "Iguana" },
-    { num: "25", nombre: "Gallina" },
-    { num: "26", nombre: "Vaca" },
-    { num: "27", nombre: "Perro" },
-    { num: "28", nombre: "Zamuro" },
-    { num: "29", nombre: "Elefante" },
-    { num: "30", nombre: "Caimán" },
-    { num: "31", nombre: "Lapa" },
-    { num: "32", nombre: "Ardilla" },
-    { num: "33", nombre: "Pescado" },
-    { num: "34", nombre: "Venado" },
-    { num: "35", nombre: "Jirafa" },
-    { num: "36", nombre: "Culebra" },
-    { num: "37", nombre: "Tortuga" },
-    { num: "38", nombre: "Búfalo" },
-    { num: "39", nombre: "Lechuza" },
-    { num: "40", nombre: "Avispa" },
-    { num: "41", nombre: "Canguro" },
-    { num: "42", nombre: "Tucán" },
-    { num: "43", nombre: "Mariposa" },
-    { num: "44", nombre: "Chigüire" },
-    { num: "45", nombre: "Garza" },
-    { num: "46", nombre: "Puma" },
-    { num: "47", nombre: "Pavo Real" },
-    { num: "48", nombre: "Puercoespín" },
-    { num: "49", nombre: "Pereza" },
-    { num: "50", nombre: "Canario" },
-    { num: "51", nombre: "Pelícano" },
-    { num: "52", nombre: "Pulpo" },
-    { num: "53", nombre: "Caracol" },
-    { num: "54", nombre: "Grillo" },
-    { num: "55", nombre: "Oso Hormiguero" },
-    { num: "56", nombre: "Tiburón" },
-    { num: "57", nombre: "Pato" },
-    { num: "58", nombre: "Hormiga" },
-    { num: "59", nombre: "Pantera" },
-    { num: "60", nombre: "Camaleón" },
-    { num: "61", nombre: "Panda" },
-    { num: "62", nombre: "Cachicamo" },
-    { num: "63", nombre: "Cangrejo" },
-    { num: "64", nombre: "Gavilán" },
-    { num: "65", nombre: "Araña" },
-    { num: "66", nombre: "Lobo" },
-    { num: "67", nombre: "Avestruz" },
-    { num: "68", nombre: "Jaguar" },
-    { num: "69", nombre: "Conejo" },
-    { num: "70", nombre: "Bisonte" },
-    { num: "71", nombre: "Guacamaya" },
-    { num: "72", nombre: "Gorila" },
-    { num: "73", nombre: "Hipopótamo" },
-    { num: "74", nombre: "Turpial" },
-    { num: "75", nombre: "Guácharo" }
-];
+// Nombres de los animalitos N=38
+const ANIMALES = {
+    0: 'Ballena', 1: 'Carnero', 2: 'Toro', 3: 'Ciempiés', 4: 'Alacrán',
+    5: 'León', 6: 'Rana', 7: 'Perico', 8: 'Ratón', 9: 'Águila',
+    10: 'Tigre', 11: 'Gato', 12: 'Caballo', 13: 'Mono', 14: 'Paloma',
+    15: 'Zorro', 16: 'Oso', 17: 'Pavo', 18: 'Burro', 19: 'Chivo',
+    20: 'Cochino', 21: 'Gallo', 22: 'Camello', 23: 'Cebra', 24: 'Iguana',
+    25: 'Gallina', 26: 'Vaca', 27: 'Perro', 28: 'Zamuro', 29: 'Elefante',
+    30: 'Caimán', 31: 'Lapa', 32: 'Ardilla', 33: 'Pescado', 34: 'Venado',
+    35: 'Jirafa', 36: 'Culebra'
+};
 
-function buscarAnimalito(codigo) {
-    if (codigo === "0" || codigo === "00") {
-        return listaAnimalitos.find(a => a.num === codigo);
-    }
-    const numEntero = parseInt(codigo, 10);
-    const numFormateado = numEntero < 10 ? "0" + numEntero : numEntero.toString();
-    return listaAnimalitos.find(a => a.num === numFormateado) || { num: numFormateado, nombre: "Desconocido" };
-}
+let lottoData = [];
+let granjitaData = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cargar fecha actual
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaInput').value = today;
-
-    // 2. Poblar el selector con los 77 animalitos
-    const selectAnimal = document.getElementById('anteriorSelect');
-    listaAnimalitos.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.num;
-        option.textContent = `${item.num} - ${item.nombre}`;
-        if (item.num === "23") option.selected = true; // 23 Cebra seleccionado por defecto
-        selectAnimal.appendChild(option);
-    });
-
-    document.getElementById('calcularBtn').addEventListener('click', ejecutarCalculo);
+// Manejo de archivos
+document.getElementById('lottoFile').addEventListener('change', (e) => {
+    readCSV(e.target.files[0], 'lotto');
+});
+document.getElementById('granjitaFile').addEventListener('change', (e) => {
+    readCSV(e.target.files[0], 'granjita');
 });
 
-function ejecutarCalculo() {
-    const fechaStr = document.getElementById('fechaInput').value;
-    const horaSorteo = document.getElementById('horaInput').value;
-    const codigoAnterior = document.getElementById('anteriorSelect').value;
+function readCSV(file, type) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const parsed = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const parts = line.split(',');
+            if (parts.length >= 3) {
+                let num = parseInt(parts[2].trim());
+                // Normalizar 00 a 0
+                if (isNaN(num)) num = 0; 
+                parsed.push({
+                    fecha: parts[0].trim(),
+                    hora: parts[1].trim(),
+                    numero: num
+                });
+            }
+        }
 
-    if (!fechaStr) {
-        alert('Selecciona la fecha del sorteo.');
+        if (type === 'lotto') {
+            lottoData = parsed;
+            document.getElementById('lottoStatus').innerText = `✅ ${parsed.length} registros cargados`;
+        } else {
+            granjitaData = parsed;
+            document.getElementById('granjitaStatus').innerText = `✅ ${parsed.length} registros cargados`;
+        }
+
+        checkReady();
+    };
+    reader.readAsText(file);
+}
+
+function checkReady() {
+    const btn = document.getElementById('analyzeBtn');
+    if (lottoData.length > 0 && granjitaData.length > 0) {
+        btn.disabled = false;
+        btn.innerText = "Analizar Datos";
+    }
+}
+
+// Función principal de análisis
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+    const mirrorDate = document.getElementById('mirrorDate').value;
+    if (!mirrorDate) {
+        alert("Por favor selecciona una fecha espejo");
         return;
     }
 
-    const animalAnterior = buscarAnimalito(codigoAnterior);
-    const numEntero = parseInt(codigoAnterior, 10);
+    // 1. Calcular frecuencias globales
+    const freqLotto = getFrequencies(lottoData);
+    const freqGranjita = getFrequencies(granjitaData);
 
-    // --- MÉTODO 1: LA PIRÁMIDE ---
-    const partesFecha = fechaStr.split('-'); // [YYYY, MM, DD]
-    const anioCorto = partesFecha[0].slice(-2);
-    const mes = partesFecha[1];
-    const dia = partesFecha[2];
-    
-    // Base: DD + MM + AA + Número Anterior (ej. "00" aporta dos ceros, "0" uno)
-    const digitosBase = `${dia}${mes}${anioCorto}${codigoAnterior}`.split('').map(Number);
-    let fila = [...digitosBase];
-    let filasPiramide = [fila.join(' ')];
+    // 2. Obtener números del espejo
+    const mirrorLotto = getMirrorNumbers(lottoData, mirrorDate);
+    const mirrorGranjita = getMirrorNumbers(granjitaData, mirrorDate);
 
-    while (fila.length > 2) {
-        let nuevaFila = [];
-        for (let i = 0; i < fila.length - 1; i++) {
-            nuevaFila.push((fila[i] + fila[i + 1]) % 10);
-        }
-        fila = nuevaFila;
-        filasPiramide.push(fila.join(' '));
+    if (mirrorLotto.length === 0 || mirrorGranjita.length === 0) {
+        document.getElementById('errorMsg').innerText = "No hay datos para la fecha espejo seleccionada.";
+        document.getElementById('errorMsg').classList.remove('hidden');
+        return;
     }
+    document.getElementById('errorMsg').classList.add('hidden');
 
-    const piramideHTML = filasPiramide.join('\n');
-    let cierreNum = parseInt(fila.join(''), 10);
-    
-    // Si el cierre pasa de 75, se reduce sumando sus dígitos (ej. 89 -> 17 Pavo)
-    if (cierreNum > 75) {
-        cierreNum = Math.floor(cierreNum / 10) + (cierreNum % 10);
-    }
-    const animalPiramide = buscarAnimalito(cierreNum === 0 ? "00" : cierreNum);
+    // 3. Rankear por frecuencia
+    const topLotto = rankNumbers(mirrorLotto, freqLotto).slice(0, 4);
+    const topGranjita = rankNumbers(mirrorGranjita, freqGranjita).slice(0, 4);
 
-    document.getElementById('piramideOutput').textContent = piramideHTML;
-    document.getElementById('reduccionFinal').textContent = `Cierre de Pirámide: ${animalPiramide.num} (${animalPiramide.nombre})`;
+    // 4. Encontrar cruce Oro
+    const gold = topLotto.filter(n => topGranjita.includes(n));
 
-    // --- MÉTODO 2: LEY DE ATRACCIÓN (JALADERA) ---
-    // A) Espejo (Invertir dígitos)
-    let codigoInvertido = codigoAnterior.length === 1 ? codigoAnterior + "0" : codigoAnterior.split('').reverse().join('');
-    let numEspejo = parseInt(codigoInvertido, 10);
-    let animalEspejo;
-    
-    if (codigoAnterior === "0") {
-        animalEspejo = buscarAnimalito("00");
-    } else if (codigoAnterior === "00") {
-        animalEspejo = buscarAnimalito("0");
-    } else if (numEspejo > 75 || numEspejo === numEntero) {
-        // Si el espejo pasa de 75 (ej. 29 -> 92) o es capicúa (ej. 22), jala la suma de sus dígitos
-        const sumaDigitos = Math.floor(numEntero / 10) + (numEntero % 10);
-        animalEspejo = buscarAnimalito(sumaDigitos);
-    } else {
-        animalEspejo = buscarAnimalito(numEspejo);
-    }
+    // 5. Renderizar en pantalla
+    renderTop(topLotto, freqLotto, 'lottoTop4');
+    renderTop(topGranjita, freqGranjita, 'granjitaTop4');
+    renderGold(gold, freqLotto, freqGranjita);
 
-    // B) Jaladera por Terminal
-    const terminal = numEntero % 10;
-    let jaladera1Num = terminal === numEntero ? (terminal + 10) : terminal;
-    let jaladera2Num = (terminal + 20) !== numEntero ? (terminal + 20) : (terminal + 30);
-    
-    const animalJala1 = buscarAnimalito(jaladera1Num);
-    const animalJala2 = buscarAnimalito(jaladera2Num);
+    document.getElementById('results').classList.remove('hidden');
+});
 
-    const atraccionList = document.getElementById('atraccionList');
-    atraccionList.innerHTML = `
-        <li><strong>Espejo / Inverso:</strong> <b>${animalEspejo.num} ${animalEspejo.nombre}</b> — Reflexión directa del ${animalAnterior.num} (${animalAnterior.nombre}).</li>
-        <li><strong>Arrastre por Terminal (${terminal}):</strong> <b>${animalJala1.num} ${animalJala1.nombre}</b> y <b>${animalJala2.num} ${animalJala2.nombre}</b> — Mantienen la misma terminación en tabla.</li>
-    `;
-
-    // --- ARMADO DEL CUADRO DE JUGADAS (DATO FIJO + RESGUARDOS) ---
-    document.getElementById('lblHoraSorteo').textContent = horaSorteo;
-    const jugadasGrid = document.getElementById('jugadasGrid');
-
-    // Evitar duplicados entre el Fijo y el Resguardo de Pirámide
-    const resguardoPiramide = animalPiramide.num !== animalEspejo.num ? animalPiramide : animalJala1;
-    const motivoResguardo = animalPiramide.num !== animalEspejo.num 
-        ? `Cierre exacto de la pirámide formada con la fecha y el ${animalAnterior.num}.`
-        : `Coincidencia de cierre piramidal y arrastre directo de terminal ${terminal}.`;
-
-    jugadasGrid.innerHTML = `
-        <div class="play-item fijo">
-            <div class="play-header">
-                <span class="play-animal">${animalEspejo.num} - ${animalEspejo.nombre.toUpperCase()}</span>
-                <span class="play-tag">Dato Fijo</span>
-            </div>
-            <p class="play-reason">Por Ley de Atracción: Es el espejo/inverso directo que jala el <strong>${animalAnterior.num} (${animalAnterior.nombre})</strong>.</p>
-        </div>
-
-        <div class="play-item">
-            <div class="play-header">
-                <span class="play-animal">${resguardoPiramide.num} - ${resguardoPiramide.nombre}</span>
-                <span class="play-tag">Resguardo Pirámide</span>
-            </div>
-            <p class="play-reason">${motivoResguardo}</p>
-        </div>
-
-        <div class="play-item">
-            <div class="play-header">
-                <span class="play-animal">${animalJala2.num} - ${animalJala2.nombre}</span>
-                <span class="play-tag">Batacazo / Terminal</span>
-            </div>
-            <p class="play-reason">Por repetición de terminal <strong>${terminal}</strong> en la escala media de la tabla.</p>
-        </div>
-    `;
-
-    document.getElementById('resultados').classList.remove('hidden');
+function getFrequencies(data) {
+    const freq = {};
+    data.forEach(row => {
+        freq[row.numero] = (freq[row.numero] || 0) + 1;
+    });
+    return freq;
 }
+
+function getMirrorNumbers(data, date) {
+    const nums = new Set();
+    data.forEach(row => {
+        if (row.fecha === date) nums.add(row.numero);
+    });
+    return Array.from(nums);
+}
+
+function rankNumbers(numbersArray, frequencies) {
+    return numbersArray.sort((a, b) => {
+        const freqA = frequencies[a] || 0;
+        const freqB = frequencies[b] || 0;
+        if (freqB !== freqA) return freqB - freqA; // Mayor frecuencia primero
+        return b - a; // Desempate
+    });
+}
+
+function renderTop(numbers, frequencies, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    numbers.forEach(num => {
+        const div = document.createElement('div');
+        div.style.marginBottom = '15px';
+        div.innerHTML = `
+            <div class="top-num">${num.toString().padStart(2, '0')}</div>
+            <div class="animal-name">${ANIMALES[num] || 'Desconocido'}</div>
+            <div class="freq">Frecuencia: ${frequencies[num]} veces</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function renderGold(goldNumbers, freqLotto, freqGranjita) {
+    const container = document.getElementById('goldCandidates');
+    container.innerHTML = '';
+    if (goldNumbers.length === 0) {
+        container.innerHTML = '<p>No hubo coincidencias en el Top 4 de ambas loterías.</p>';
+        return;
+    }
+    goldNumbers.forEach(num => {
+        const div = document.createElement('div');
+        div.style.background = 'var(--panel)';
+        div.style.padding = '15px';
+        div.style.borderRadius = '8px';
+        div.style.minWidth = '120px';
+        div.innerHTML = `
+            <div style="font-size: 2rem; color: var(--gold); font-weight:bold;">${num.toString().padStart(2, '0')}</div>
+            <div style="font-weight: bold;">${ANIMALES[num]}</div>
+            <div style="font-size: 0.8rem; color: #8b949e;">Lotto: ${freqLotto[num]} | Granjita: ${freqGranjita[num]}</div>
+        `;
+        container.appendChild(div);
+    });
+        }
