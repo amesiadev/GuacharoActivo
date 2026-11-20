@@ -3,70 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Guácharo Activo</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Analizador Lotto Activo & Granjita</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --panel: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --gold: #d29922;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { text-align: center; color: var(--accent); }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .upload-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .upload-box {
+            flex: 1;
+            min-width: 250px;
+            border: 2px dashed var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        input[type="file"] { display: none; }
+        .btn {
+            background: var(--accent);
+            color: #0d1117;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background: #555; cursor: not-allowed; }
+        .date-inputs {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        input[type="date"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) { .results-grid { grid-template-columns: 1fr; } }
+        .card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .card h3 { margin-top: 0; color: var(--accent); }
+        .top-num {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--green);
+            margin: 5px 0;
+        }
+        .animal-name { font-size: 1.1rem; color: var(--text); }
+        .freq { font-size: 0.9rem; color: #8b949e; }
+        .oro-box {
+            grid-column: 1 / -1;
+            background: rgba(210, 153, 34, 0.1);
+            border: 2px solid var(--gold);
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .oro-box h2 { color: var(--gold); margin-top: 0; }
+        .hidden { display: none; }
+        .error { color: #f85149; text-align: center; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <h1>Guácharo Activo</h1>
-            <p>Proyección por Pirámide & Ley de Atracción</p>
-        </header>
 
-        <main class="card">
-            <div class="input-grid">
-                <div class="input-group">
-                    <label for="fechaInput">Fecha del Sorteo</label>
-                    <input type="date" id="fechaInput">
-                </div>
-
-                <div class="input-group">
-                    <label for="horaInput">Próximo Sorteo</label>
-                    <select id="horaInput">
-                        <option value="08:00 AM">08:00 AM</option>
-                        <option value="09:00 AM">09:00 AM</option>
-                        <option value="10:00 AM">10:00 AM</option>
-                        <option value="11:00 AM">11:00 AM</option>
-                        <option value="12:00 PM">12:00 PM</option>
-                        <option value="01:00 PM" selected>01:00 PM</option>
-                        <option value="02:00 PM">02:00 PM</option>
-                        <option value="03:00 PM">03:00 PM</option>
-                        <option value="04:00 PM">04:00 PM</option>
-                        <option value="05:00 PM">05:00 PM</option>
-                        <option value="06:00 PM">06:00 PM</option>
-                        <option value="07:00 PM">07:00 PM</option>
-                    </select>
-                </div>
+<div class="container">
+    <h1>🐎 Auditor Lotto & Granjita (N=38)</h1>
+    
+    <div class="panel">
+        <div class="upload-group">
+            <div class="upload-box">
+                <p>1. Sube el CSV de <b>Lotto Activo</b></p>
+                <label for="lottoFile" class="btn" style="display:block; text-align:center; padding: 8px; cursor:pointer;">Seleccionar Archivo</label>
+                <input type="file" id="lottoFile" accept=".csv">
+                <p id="lottoStatus" style="font-size: 0.8rem; color: #8b949e;">Sin archivo</p>
             </div>
-
-            <div class="input-group">
-                <label for="anteriorSelect">Resultado Anterior (Tabla Oficial 0 - 75)</label>
-                <select id="anteriorSelect"></select>
+            <div class="upload-box">
+                <p>2. Sube el CSV de <b>La Granjita</b></p>
+                <label for="granjitaFile" class="btn" style="display:block; text-align:center; padding: 8px; cursor:pointer;">Seleccionar Archivo</label>
+                <input type="file" id="granjitaFile" accept=".csv">
+                <p id="granjitaStatus" style="font-size: 0.8rem; color: #8b949e;">Sin archivo</p>
             </div>
+        </div>
 
-            <button id="calcularBtn" class="primary-btn">Calcular Jugadas</button>
-        </main>
+        <div class="date-inputs">
+            <label>Fecha Espejo (Mes Anterior):</label>
+            <input type="date" id="mirrorDate" value="2026-10-20">
+        </div>
 
-        <section id="resultados" class="results-container hidden">
-            <div class="result-card highlight-card">
-                <h3>Jugadas Recomendadas — <span id="lblHoraSorteo"></span></h3>
-                <div id="jugadasGrid" class="plays-grid"></div>
-            </div>
-
-            <div class="result-card">
-                <h3>Desglose de Ley de Atracción (Jaladera)</h3>
-                <ul id="atraccionList" class="attraction-list"></ul>
-            </div>
-
-            <div class="result-card">
-                <h3>Estructura de la Pirámide</h3>
-                <div id="piramideOutput" class="pyramid-box"></div>
-                <p id="reduccionFinal" class="pyramid-footer"></p>
-            </div>
-        </section>
+        <button class="btn" id="analyzeBtn" disabled>Analizar y Generar Top 4</button>
+        <p id="errorMsg" class="error hidden"></p>
     </div>
 
-    <script src="app.js"></script>
+    <div id="results" class="hidden">
+        <div class="results-grid">
+            <!-- Lotto Activo -->
+            <div class="card">
+                <h3>Top 4 Lotto Activo</h3>
+                <div id="lottoTop4"></div>
+            </div>
+            
+            <!-- La Granjita -->
+            <div class="card">
+                <h3>Top 4 La Granjita</h3>
+                <div id="granjitaTop4"></div>
+            </div>
+        </div>
+
+        <!-- Cruce Oro -->
+        <div class="oro-box">
+            <h2>✨ Candidatos Oro (En ambos Top 4) ✨</h2>
+            <div id="goldCandidates" style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Nombres de los animalitos N=38
+    const ANIMALES = {
+        0: 'Ballena', 1: 'Carnero', 2: 'Toro', 3: 'Ciempiés', 4: 'Alacrán',
+        5: 'León', 6: 'Rana', 7: 'Perico', 8: 'Ratón', 9: 'Águila',
+        10: 'Tigre', 11: 'Gato', 12: 'Caballo', 13: 'Mono', 14: 'Paloma',
+        15: 'Zorro', 16: 'Oso', 17: 'Pavo', 18: 'Burro', 19: 'Chivo',
+        20: 'Cochino', 21: 'Gallo', 22: 'Camello', 23: 'Cebra', 24: 'Iguana',
+        25: 'Gallina', 26: 'Vaca', 27: 'Perro', 28: 'Zamuro', 29: 'Elefante',
+        30: 'Caimán', 31: 'Lapa', 32: 'Ardilla', 33: 'Pescado', 34: 'Venado',
+        35: 'Jirafa', 36: 'Culebra'
+    };
+
+    let lottoData = [];
+    let granjitaData = [];
+
+    // Manejo de archivos
+    document.getElementById('lottoFile').addEventListener('change', (e) => {
+        readCSV(e.target.files[0], 'lotto');
+    });
+    document.getElementById('granjitaFile').addEventListener('change', (e) => {
+        readCSV(e.target.files[0], 'granjita');
+    });
+
+    function readCSV(file, type) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            const parsed = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const parts = line.split(',');
+                if (parts.length >= 3) {
+                    let num = parseInt(parts[2].trim());
+                    // Normalizar 00 a 0
+                    if (isNaN(num)) num = 0; 
+                    parsed.push({
+                        fecha: parts[0].trim(),
+                        hora: parts[1].trim(),
+                        numero: num
+                    });
+                }
+            }
+
+            if (type === 'lotto') {
+                lottoData = parsed;
+                document.getElementById('lottoStatus').innerText = `✅ ${parsed.length} registros cargados`;
+            } else {
+                granjitaData = parsed;
+                document.getElementById('granjitaStatus').innerText = `✅ ${parsed.length} registros cargados`;
+            }
+
+            checkReady();
+        };
+        reader.readAsText(file);
+    }
+
+    function checkReady() {
+        const btn = document.getElementById('analyzeBtn');
+        if (lottoData.length > 0 && granjitaData.length > 0) {
+            btn.disabled = false;
+            btn.innerText = "Analizar Datos";
+        }
+    }
+
+    // Función principal de análisis
+    document.getElementById('analyzeBtn').addEventListener('click', () => {
+        const mirrorDate = document.getElementById('mirrorDate').value;
+        if (!mirrorDate) {
+            alert("Por favor selecciona una fecha espejo");
+            return;
+        }
+
+        // 1. Calcular frecuencias globales
+        const freqLotto = getFrequencies(lottoData);
+        const freqGranjita = getFrequencies(granjitaData);
+
+        // 2. Obtener números del espejo
+        const mirrorLotto = getMirrorNumbers(lottoData, mirrorDate);
+        const mirrorGranjita = getMirrorNumbers(granjitaData, mirrorDate);
+
+        if (mirrorLotto.length === 0 || mirrorGranjita.length === 0) {
+            document.getElementById('errorMsg').innerText = "No hay datos para la fecha espejo seleccionada.";
+            document.getElementById('errorMsg').classList.remove('hidden');
+            return;
+        }
+        document.getElementById('errorMsg').classList.add('hidden');
+
+        // 3. Rankear por frecuencia (desempatar por número mayor)
+        const topLotto = rankNumbers(mirrorLotto, freqLotto).slice(0, 4);
+        const topGranjita = rankNumbers(mirrorGranjita, freqGranjita).slice(0, 4);
+
+        // 4. Encontrar cruce Oro
+        const gold = topLotto.filter(n => topGranjita.includes(n));
+
+        // 5. Renderizar
+        renderTop(topLotto, freqLotto, 'lottoTop4');
+        renderTop(topGranjita, freqGranjita, 'granjitaTop4');
+        renderGold(gold, freqLotto, freqGranjita);
+
+        document.getElementById('results').classList.remove('hidden');
+    });
+
+    function getFrequencies(data) {
+        const freq = {};
+        data.forEach(row => {
+            freq[row.numero] = (freq[row.numero] || 0) + 1;
+        });
+        return freq;
+    }
+
+    function getMirrorNumbers(data, date) {
+        const nums = new Set();
+        data.forEach(row => {
+            if (row.fecha === date) nums.add(row.numero);
+        });
+        return Array.from(nums);
+    }
+
+    function rankNumbers(numbersArray, frequencies) {
+        return numbersArray.sort((a, b) => {
+            const freqA = frequencies[a] || 0;
+            const freqB = frequencies[b] || 0;
+            if (freqB !== freqA) return freqB - freqA; // Mayor frecuencia primero
+            return b - a; // Desempate: número mayor
+        });
+    }
+
+    function renderTop(numbers, frequencies, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        numbers.forEach(num => {
+            const div = document.createElement('div');
+            div.style.marginBottom = '15px';
+            div.innerHTML = `
+                <div class="top-num">${num.toString().padStart(2, '0')}</div>
+                <div class="animal-name">${ANIMALES[num] || 'Desconocido'}</div>
+                <div class="freq">Frecuencia: ${frequencies[num]} veces</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderGold(goldNumbers, freqLotto, freqGranjita) {
+        const container = document.getElementById('goldCandidates');
+        container.innerHTML = '';
+        if (goldNumbers.length === 0) {
+            container.innerHTML = '<p>No hubo coincidencias en el Top 4 de ambas loterías.</p>';
+            return;
+        }
+        goldNumbers.forEach(num => {
+            const div = document.createElement('div');
+            div.style.background = 'var(--panel)';
+            div.style.padding = '15px';
+            div.style.borderRadius = '8px';
+            div.style.minWidth = '120px';
+            div.innerHTML = `
+                <div style="font-size: 2rem; color: var(--gold); font-weight:bold;">${num.toString().padStart(2, '0')}</div>
+                <div style="font-weight: bold;">${ANIMALES[num]}</div>
+                <div style="font-size: 0.8rem; color: #8b949e;">Lotto: ${freqLotto[num]} | Granjita: ${freqGranjita[num]}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+
 </body>
-</html>
+    </html>
