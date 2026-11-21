@@ -1,401 +1,163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador Lotto & Granjita & Guácharo</title>
-    <style>
-        :root {
-            --bg: #0d1117; --panel: #161b22; --border: #30363d;
-            --text: #e6edf3; --accent: #58a6ff; --green: #3fb950; --gold: #d29922;
-            --purple: #a371f7;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg); color: var(--text); margin: 0; padding: 20px;
-        }
-        .container { max-width: 1100px; margin: 0 auto; }
-        h1 { text-align: center; color: var(--accent); font-size: 1.8rem; }
-        .panel {
-            background: var(--panel); border: 1px solid var(--border);
-            border-radius: 10px; padding: 20px; margin-bottom: 20px;
-        }
-        .upload-group { display: flex; gap: 15px; flex-wrap: wrap; }
-        .upload-box {
-            flex: 1; min-width: 200px; border: 2px dashed var(--border);
-            padding: 15px; border-radius: 8px; text-align: center;
-        }
-        input[type="file"] { display: none; }
-        .btn {
-            background: var(--accent); color: #0d1117; border: none;
-            padding: 12px 20px; border-radius: 6px; cursor: pointer;
-            font-weight: bold; margin-top: 10px; width: 100%; font-size: 16px;
-        }
-        .btn:hover { opacity: 0.9; }
-        .btn:disabled { background: #555; cursor: not-allowed; }
-        .btn-whatsapp { background: #25D366; color: white; margin-top: 15px; }
-        .settings-group {
-            display: flex; gap: 15px; margin-top: 20px;
-            justify-content: center; align-items: center; flex-wrap: wrap;
-            background: rgba(88, 166, 255, 0.05); padding: 15px; border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        .setting-item { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
-        .setting-item label { font-size: 0.85rem; color: #8b949e; font-weight: bold; }
-        input[type="date"], input[type="number"], select {
-            padding: 8px; border-radius: 5px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text); font-size: 16px;
-            font-family: inherit;
-        }
-        input[type="number"] { width: 80px; }
-        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
-        @media (max-width: 800px) { .results-grid { grid-template-columns: 1fr; } }
-        .card {
-            background: var(--panel); border: 1px solid var(--border);
-            border-radius: 8px; padding: 15px; text-align: center;
-        }
-        .card h3 { margin-top: 0; color: var(--accent); }
-        .card.guacharo h3 { color: var(--purple); }
-        .card.guacharo { border-color: var(--purple); }
-        .top-num { font-size: 2rem; font-weight: bold; color: var(--green); margin: 5px 0; }
-        .animal-name { font-size: 1.1rem; color: var(--text); }
-        .freq { font-size: 0.9rem; color: #8b949e; }
-        .oro-box {
-            grid-column: 1 / -1; background: rgba(210, 153, 34, 0.1);
-            border: 2px solid var(--gold); text-align: center;
-            padding: 20px; border-radius: 10px; margin-top: 20px;
-        }
-        .oro-box h2 { color: var(--gold); margin-top: 0; }
-        .oro-sub { color: #8b949e; font-size: 0.9rem; margin-bottom: 15px; }
-        .hidden { display: none; }
-        .error { color: #f85149; text-align: center; margin-top: 10px; font-weight: bold; }
-        .toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--green); color: white; padding: 12px 24px;
-            border-radius: 30px; font-weight: bold; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        .toast.show { opacity: 1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador Lotto & Granjita & Guácharo</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--text:#e6edf3;--accent:#58a6ff;--green:#3fb950;--gold:#d29922;--purple:#a371f7;--red:#f85149}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:var(--bg);color:var(--text);margin:0;padding:20px}
+.container{max-width:1100px;margin:0 auto}
+h1{text-align:center;color:var(--accent);font-size:1.8rem}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px}
+.upload-group{display:flex;gap:15px;flex-wrap:wrap}
+.upload-box{flex:1;min-width:200px;border:2px dashed var(--border);padding:15px;border-radius:8px;text-align:center}
+input[type="file"]{display:none}
+.btn{background:var(--accent);color:#0d1117;border:none;padding:12px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-top:10px;width:100%;font-size:16px}
+.btn:hover{opacity:.9}
+.btn:disabled{background:#555;cursor:not-allowed}
+.btn-whatsapp{background:#25D366;color:white;margin-top:15px}
+.btn-jaladera{background:var(--gold);color:#0d1117}
+.settings-group{display:flex;gap:15px;margin-top:20px;justify-content:center;align-items:center;flex-wrap:wrap;background:rgba(88,166,255,.05);padding:15px;border-radius:8px;border:1px solid var(--border)}
+.setting-item{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.setting-item label{font-size:.85rem;color:#8b949e;font-weight:bold}
+input[type="date"],input[type="number"],select{padding:8px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:16px;font-family:inherit}
+input[type="number"]{width:80px}
+.jaladera-group{display:flex;gap:15px;margin-top:15px;justify-content:center;align-items:center;flex-wrap:wrap;background:rgba(210,153,34,.08);padding:15px;border-radius:8px;border:1px solid var(--gold)}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
+@media(max-width:800px){.results-grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:15px;text-align:center}
+.card h3{margin-top:0;color:var(--accent)}
+.card.guacharo h3{color:var(--purple)}
+.card.guacharo{border-color:var(--purple)}
+.top-num{font-size:2rem;font-weight:bold;color:var(--green);margin:5px 0}
+.animal-name{font-size:1.1rem;color:var(--text)}
+.freq{font-size:.9rem;color:#8b949e}
+.oro-box{grid-column:1/-1;background:rgba(210,153,34,.1);border:2px solid var(--gold);text-align:center;padding:20px;border-radius:10px;margin-top:20px}
+.oro-box h2{color:var(--gold);margin-top:0}
+.oro-sub{color:#8b949e;font-size:.9rem;margin-bottom:15px}
+.filtro-box{background:rgba(63,185,80,.08);border:2px solid var(--green);text-align:center;padding:20px;border-radius:10px;margin-top:20px}
+.filtro-box h2{color:var(--green);margin-top:0}
+.filtro-sub{color:#8b949e;font-size:.9rem;margin-bottom:15px}
+.chip{display:inline-block;background:var(--panel);border:1px solid var(--border);padding:8px 12px;border-radius:20px;margin:4px;font-size:.9rem}
+.chip.match{border-color:var(--green);background:rgba(63,185,80,.15);font-weight:bold}
+.hidden{display:none}
+.error{color:var(--red);text-align:center;margin-top:10px;font-weight:bold}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:12px 24px;border-radius:30px;font-weight:bold;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.toast.show{opacity:1}
+</style>
 </head>
 <body>
-
 <div class="container">
-    <h1>🐎 Auditor Lotto & Granjita & Guácharo</h1>
-
-    <div class="panel">
-        <div class="upload-group">
-            <div class="upload-box">
-                <p>1. CSV de <b>Lotto Activo</b></p>
-                <label for="lottoFile" class="btn" style="padding: 8px;">Seleccionar Archivo</label>
-                <input type="file" id="lottoFile" accept=".csv">
-                <p id="lottoStatus" style="font-size: 0.8rem; color: #8b949e;">Sin archivo</p>
-            </div>
-            <div class="upload-box">
-                <p>2. CSV de <b>La Granjita</b></p>
-                <label for="granjitaFile" class="btn" style="padding: 8px;">Seleccionar Archivo</label>
-                <input type="file" id="granjitaFile" accept=".csv">
-                <p id="granjitaStatus" style="font-size: 0.8rem; color: #8b949e;">Sin archivo</p>
-            </div>
-            <div class="upload-box" style="border-color: var(--purple);">
-                <p>3. CSV de <b>Guácharo Activo</b></p>
-                <label for="guacharoFile" class="btn" style="padding: 8px; background: var(--purple);">Seleccionar Archivo</label>
-                <input type="file" id="guacharoFile" accept=".csv">
-                <p id="guacharoStatus" style="font-size: 0.8rem; color: #8b949e;">Sin archivo</p>
-            </div>
-        </div>
-
-        <div class="settings-group">
-            <div class="setting-item">
-                <label>Fecha Espejo</label>
-                <input type="date" id="mirrorDate" value="2026-10-20">
-            </div>
-            <div class="setting-item">
-                <label>Monto por animalito</label>
-                <input type="number" id="montoApuesta" value="1.5" step="0.1" min="0.1">
-            </div>
-            <div class="setting-item">
-                <label>Sorteo</label>
-                <select id="horaSorteo">
-                    <option value="8 AM">8 AM</option>
-                    <option value="9 AM">9 AM</option>
-                    <option value="10 AM">10 AM</option>
-                    <option value="11 AM">11 AM</option>
-                    <option value="12 PM">12 PM</option>
-                    <option value="1 PM">1 PM</option>
-                    <option value="2 PM">2 PM</option>
-                    <option value="3 PM">3 PM</option>
-                    <option value="4 PM">4 PM</option>
-                    <option value="5 PM">5 PM</option>
-                    <option value="6 PM">6 PM</option>
-                    <option value="7 PM">7 PM</option>
-                </select>
-            </div>
-        </div>
-
-        <button class="btn" id="analyzeBtn" disabled>Analizar y Generar Top 4</button>
-        <p id="errorMsg" class="error hidden"></p>
-    </div>
-
-    <div id="results" class="hidden">
-        <div class="results-grid">
-            <div class="card">
-                <h3>Top 4 Lotto Activo</h3>
-                <div id="lottoTop4"></div>
-            </div>
-            <div class="card">
-                <h3>Top 4 La Granjita</h3>
-                <div id="granjitaTop4"></div>
-            </div>
-            <div class="card guacharo">
-                <h3>Top 4 Guácharo Activo</h3>
-                <div id="guacharoTop4"></div>
-            </div>
-        </div>
-
-        <div class="oro-box">
-            <h2>✨ Candidatos Oro ✨</h2>
-            <p class="oro-sub">Coincidencias en los Top 4 de Lotto y Granjita. En morado: además coincide con el Top Guácharo.</p>
-            <div id="goldCandidates" style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;"></div>
-        </div>
-
-        <button class="btn btn-whatsapp" id="waBtn">📱 Generar Jugada para WhatsApp</button>
-    </div>
+<h1>🐎 Auditor Lotto & Granjita & Guácharo</h1>
+<div class="panel">
+<div class="upload-group">
+<div class="upload-box">
+<p>1. CSV de <b>Lotto Activo</b></p>
+<label for="lottoFile" class="btn" style="padding:8px">Seleccionar Archivo</label>
+<input type="file" id="lottoFile" accept=".csv">
+<p id="lottoStatus" style="font-size:.8rem;color:#8b949e">Sin archivo</p>
 </div>
-
+<div class="upload-box">
+<p>2. CSV de <b>La Granjita</b></p>
+<label for="granjitaFile" class="btn" style="padding:8px">Seleccionar Archivo</label>
+<input type="file" id="granjitaFile" accept=".csv">
+<p id="granjitaStatus" style="font-size:.8rem;color:#8b949e">Sin archivo</p>
+</div>
+<div class="upload-box" style="border-color:var(--purple)">
+<p>3. CSV de <b>Guácharo Activo</b></p>
+<label for="guacharoFile" class="btn" style="padding:8px;background:var(--purple)">Seleccionar Archivo</label>
+<input type="file" id="guacharoFile" accept=".csv">
+<p id="guacharoStatus" style="font-size:.8rem;color:#8b949e">Sin archivo</p>
+</div>
+</div>
+<div class="settings-group">
+<div class="setting-item">
+<label>Fecha Espejo</label>
+<input type="date" id="mirrorDate" value="2026-10-20">
+</div>
+<div class="setting-item">
+<label>Monto por animalito</label>
+<input type="number" id="montoApuesta" value="1.5" step="0.1" min="0.1">
+</div>
+<div class="setting-item">
+<label>Sorteo</label>
+<select id="horaSorteo">
+<option value="8 AM">8 AM</option>
+<option value="9 AM">9 AM</option>
+<option value="10 AM">10 AM</option>
+<option value="11 AM">11 AM</option>
+<option value="12 PM">12 PM</option>
+<option value="1 PM">1 PM</option>
+<option value="2 PM">2 PM</option>
+<option value="3 PM">3 PM</option>
+<option value="4 PM">4 PM</option>
+<option value="5 PM">5 PM</option>
+<option value="6 PM">6 PM</option>
+<option value="7 PM">7 PM</option>
+</select>
+</div>
+</div>
+<button class="btn" id="analyzeBtn" disabled>Analizar y Generar Top 4</button>
+<p id="errorMsg" class="error hidden"></p>
+<div class="jaladera-group hidden" id="jaladeraPanel">
+<div class="setting-item" style="min-width:220px">
+<label>🎯 Animalito que salió en el sorteo actual</label>
+<select id="animalActual"></select>
+</div>
+<button class="btn btn-jaladera" id="applyJaladeraBtn" style="width:auto;margin-top:0">Aplicar Jaladera</button>
+</div>
+</div>
+<div id="results" class="hidden">
+<div class="results-grid">
+<div class="card">
+<h3>Top 4 Lotto Activo</h3>
+<div id="lottoTop4"></div>
+</div>
+<div class="card">
+<h3>Top 4 La Granjita</h3>
+<div id="granjitaTop4"></div>
+</div>
+<div class="card guacharo">
+<h3>Top 4 Guácharo Activo</h3>
+<div id="guacharoTop4"></div>
+</div>
+</div>
+<div class="oro-box">
+<h2>✨ Candidatos Oro ✨</h2>
+<p class="oro-sub">Coincidencias en los Top 4 de Lotto y Granjita. En morado: además coincide con el Top Guácharo.</p>
+<div id="goldCandidates" style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap"></div>
+</div>
+<div class="filtro-box hidden" id="filtroBox">
+<h2>🎯 Filtrados por Jaladera</h2>
+<p class="filtro-sub" id="filtroSub"></p>
+<div id="filtroChips" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+</div>
+<button class="btn btn-whatsapp" id="waBtn">📱 Generar Jugada para WhatsApp</button>
+</div>
+</div>
 <div id="toast" class="toast">¡Copiado al portapapeles!</div>
-
 <script>
-    // ===== Diccionarios =====
-    // Lotto / Granjita: "0" = Delfín, "00" = Ballena, "01".."36"
-    const ANIMALES_BASE = {
-        "0": "Delfín",
-        "00": "Ballena",
-        "01": "Carnero", "02": "Toro", "03": "Ciempiés", "04": "Alacrán",
-        "05": "León", "06": "Rana", "07": "Perico", "08": "Ratón", "09": "Águila",
-        "10": "Tigre", "11": "Gato", "12": "Caballo", "13": "Mono", "14": "Paloma",
-        "15": "Zorro", "16": "Oso", "17": "Pavo", "18": "Burro", "19": "Chivo",
-        "20": "Cochino", "21": "Gallo", "22": "Camello", "23": "Cebra", "24": "Iguana",
-        "25": "Gallina", "26": "Vaca", "27": "Perro", "28": "Zamuro", "29": "Elefante",
-        "30": "Caimán", "31": "Lapa", "32": "Ardilla", "33": "Pescado", "34": "Venado",
-        "35": "Jirafa", "36": "Culebra"
-    };
-
-    // Guácharo: "0" = Delfín, "00" = Ballena, "01".."75"
-    const ANIMALES_GUACHARO = {
-        "0": "Delfín",
-        "00": "Ballena",
-        "01": "Carnero", "02": "Toro", "03": "Ciempiés", "04": "Alacrán",
-        "05": "León", "06": "Rana", "07": "Perico", "08": "Ratón", "09": "Águila",
-        "10": "Tigre", "11": "Gato", "12": "Caballo", "13": "Mono", "14": "Paloma",
-        "15": "Zorro", "16": "Oso", "17": "Pavo", "18": "Burro", "19": "Chivo",
-        "20": "Cochino", "21": "Gallo", "22": "Camello", "23": "Cebra", "24": "Iguana",
-        "25": "Gallina", "26": "Vaca", "27": "Perro", "28": "Zamuro", "29": "Elefante",
-        "30": "Caimán", "31": "Lapa", "32": "Ardilla", "33": "Pescado", "34": "Venado",
-        "35": "Jirafa", "36": "Culebra", "37": "Tortuga", "38": "Búfalo", "39": "Lechuza",
-        "40": "Avispa", "41": "Canguro", "42": "Tucán", "43": "Mariposa", "44": "Chigüire",
-        "45": "Garza", "46": "Puma", "47": "Pavo Real", "48": "Puercoespín", "49": "Pereza",
-        "50": "Canario", "51": "Pelícano", "52": "Pulpo", "53": "Caracol", "54": "Grillo",
-        "55": "Oso Hormiguero", "56": "Tiburón", "57": "Pato", "58": "Hormiga", "59": "Pantera",
-        "60": "Camaleón", "61": "Panda", "62": "Cachicamo", "63": "Cangrejo", "64": "Gavilán",
-        "65": "Araña", "66": "Lobo", "67": "Avestruz", "68": "Jaguar", "69": "Conejo",
-        "70": "Bisonte", "71": "Guacamaya", "72": "Gorila", "73": "Hipopótamo", "74": "Turpial",
-        "75": "Guácharo"
-    };
-
-    let lottoData = [];
-    let granjitaData = [];
-    let guacharoData = [];
-    let currentTopLotto = [];
-    let currentTopGranjita = [];
-    let currentTopGuacharo = [];
-
-    document.getElementById('lottoFile').addEventListener('change', e => readCSV(e.target.files[0], 'lotto'));
-    document.getElementById('granjitaFile').addEventListener('change', e => readCSV(e.target.files[0], 'granjita'));
-    document.getElementById('guacharoFile').addEventListener('change', e => readCSV(e.target.files[0], 'guacharo'));
-
-    // Normaliza el número: "0" -> "0", "00" -> "00", "5" -> "05"
-    function normalizarNumero(raw) {
-        raw = String(raw).trim();
-        if (raw === '0' || raw === '00') return raw;
-        if (/^\d+$/.test(raw)) return raw.padStart(2, '0');
-        return null;
-    }
-
-    function readCSV(file, type) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target.result.replace(/\r/g, '');
-            const sep = (text.includes(';') && !text.includes(',')) ? ';' : ',';
-            const lines = text.split('\n');
-            const parsed = [];
-            let descartadas = 0;
-
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue; // vacía: no cuenta como descartada
-                const parts = line.split(sep).map(p => p.trim().replace(/^"|"$/g, ''));
-                if (parts.length < 3) { descartadas++; continue; }
-                const fecha = parts[0], hora = parts[1];
-                const num = normalizarNumero(parts[2]);
-                if (!fecha || !hora || num === null) { descartadas++; continue; }
-                parsed.push({ fecha, hora, numero: num });
-            }
-
-            console.log(`[${type}] leídas: ${parsed.length}, descartadas: ${descartadas}, total líneas: ${lines.length}`);
-
-            const statusEl = document.getElementById(type + 'Status');
-            statusEl.innerText = `✅ ${parsed.length} registros (descartadas: ${descartadas})`;
-            statusEl.style.color = '#3fb950';
-
-            if (type === 'lotto') lottoData = parsed;
-            else if (type === 'granjita') granjitaData = parsed;
-            else guacharoData = parsed;
-
-            if (lottoData.length && granjitaData.length && guacharoData.length) {
-                document.getElementById('analyzeBtn').disabled = false;
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    document.getElementById('analyzeBtn').addEventListener('click', () => {
-        const mirrorDate = document.getElementById('mirrorDate').value;
-        if (!mirrorDate) { alert("Selecciona una fecha espejo"); return; }
-
-        const freqLotto = getFrequencies(lottoData);
-        const freqGranjita = getFrequencies(granjitaData);
-        const freqGuacharo = getFrequencies(guacharoData);
-
-        const mirrorLotto = getMirrorNumbers(lottoData, mirrorDate);
-        const mirrorGranjita = getMirrorNumbers(granjitaData, mirrorDate);
-        const mirrorGuacharo = getMirrorNumbers(guacharoData, mirrorDate);
-
-        if (!mirrorLotto.length || !mirrorGranjita.length || !mirrorGuacharo.length) {
-            const err = document.getElementById('errorMsg');
-            err.innerText = "No hay datos para la fecha seleccionada en una o más loterías.";
-            err.classList.remove('hidden');
-            return;
-        }
-        document.getElementById('errorMsg').classList.add('hidden');
-
-        currentTopLotto = rankNumbers(mirrorLotto, freqLotto).slice(0, 4);
-        currentTopGranjita = rankNumbers(mirrorGranjita, freqGranjita).slice(0, 4);
-        currentTopGuacharo = rankNumbers(mirrorGuacharo, freqGuacharo).slice(0, 4);
-
-        // Oro base: intersección Lotto ∩ Granjita
-        const goldBase = currentTopLotto.filter(n => currentTopGranjita.includes(n));
-        // Oro cruzado: además aparece en Top Guácharo
-        const goldCruzado = goldBase.filter(n => currentTopGuacharo.includes(n));
-
-        renderTop(currentTopLotto, freqLotto, 'lottoTop4', ANIMALES_BASE);
-        renderTop(currentTopGranjita, freqGranjita, 'granjitaTop4', ANIMALES_BASE);
-        renderTop(currentTopGuacharo, freqGuacharo, 'guacharoTop4', ANIMALES_GUACHARO);
-        renderGold(goldBase, goldCruzado);
-
-        document.getElementById('results').classList.remove('hidden');
-    });
-
-    function getFrequencies(data) {
-        const freq = {};
-        data.forEach(row => { freq[row.numero] = (freq[row.numero] || 0) + 1; });
-        return freq;
-    }
-
-    function getMirrorNumbers(data, date) {
-        const nums = new Set();
-        data.forEach(row => { if (row.fecha === date) nums.add(row.numero); });
-        return Array.from(nums);
-    }
-
-    function rankNumbers(arr, frequencies) {
-        return arr.sort((a, b) => {
-            const fa = frequencies[a] || 0;
-            const fb = frequencies[b] || 0;
-            if (fb !== fa) return fb - fa;
-            return Number(b) - Number(a); // desempate numérico
-        });
-    }
-
-    function renderTop(numbers, frequencies, containerId, dict) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        numbers.forEach(num => {
-            const div = document.createElement('div');
-            div.style.marginBottom = '15px';
-            div.innerHTML = `
-                <div class="top-num">${num}</div>
-                <div class="animal-name">${dict[num] || 'Desconocido'}</div>
-                <div class="freq">Frecuencia: ${frequencies[num]} veces</div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function renderGold(goldBase, goldCruzado) {
-        const container = document.getElementById('goldCandidates');
-        container.innerHTML = '';
-
-        if (!goldBase.length) {
-            container.innerHTML = '<p>No hubo coincidencias entre Lotto y Granjita.</p>';
-            return;
-        }
-
-        goldBase.forEach(num => {
-            const esCruzado = goldCruzado.includes(num);
-            const div = document.createElement('div');
-            div.style.background = 'var(--panel)';
-            div.style.padding = '15px';
-            div.style.borderRadius = '8px';
-            div.style.minWidth = '120px';
-            div.style.border = `1px solid ${esCruzado ? 'var(--purple)' : 'var(--gold)'}`;
-            div.innerHTML = `
-                <div style="font-size: 2rem; color: ${esCruzado ? 'var(--purple)' : 'var(--gold)'}; font-weight:bold;">${num}</div>
-                <div style="font-weight: bold;">${ANIMALES_BASE[num] || 'Desconocido'}</div>
-                ${esCruzado ? '<div style="font-size:0.75rem; color:var(--purple); margin-top:4px;">🟣 Oro cruzado con Guácharo</div>' : ''}
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    document.getElementById('waBtn').addEventListener('click', () => {
-        const monto = document.getElementById('montoApuesta').value;
-        const hora = document.getElementById('horaSorteo').value;
-        let mensaje = `Sorteo de las ${hora},\n\n`;
-
-        if (currentTopLotto.length) {
-            mensaje += "*Lotto Activo:*\n";
-            currentTopLotto.forEach(num => {
-                mensaje += `• ${ANIMALES_BASE[num]} (${num})\n`;
-            });
-            mensaje += `Monto: ${monto} c/u\n\n`;
-        }
-
-        if (currentTopGranjita.length) {
-            mensaje += "*La Granjita:*\n";
-            currentTopGranjita.forEach(num => {
-                mensaje += `• ${ANIMALES_BASE[num]} (${num})\n`;
-            });
-            mensaje += `Monto: ${monto} c/u\n\n`;
-        }
-
-        if (currentTopGuacharo.length) {
-            mensaje += "*Guácharo Activo:*\n";
-            currentTopGuacharo.forEach(num => {
-                mensaje += `• ${ANIMALES_GUACHARO[num]} (${num})\n`;
-            });
-            mensaje += `Monto: ${monto} c/u`;
-        }
-
-        navigator.clipboard.writeText(mensaje).then(() => {
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }).catch(() => {
-            alert("Error al copiar. Aquí tienes el texto para copiar manualmente:\n\n" + mensaje);
-        });
-    });
+const ANIMALES_BASE={"0":"Delfín","00":"Ballena","01":"Carnero","02":"Toro","03":"Ciempiés","04":"Alacrán","05":"León","06":"Rana","07":"Perico","08":"Ratón","09":"Águila","10":"Tigre","11":"Gato","12":"Caballo","13":"Mono","14":"Paloma","15":"Zorro","16":"Oso","17":"Pavo","18":"Burro","19":"Chivo","20":"Cochino","21":"Gallo","22":"Camello","23":"Cebra","24":"Iguana","25":"Gallina","26":"Vaca","27":"Perro","28":"Zamuro","29":"Elefante","30":"Caimán","31":"Lapa","32":"Ardilla","33":"Pescado","34":"Venado","35":"Jirafa","36":"Culebra"};
+const ANIMALES_GUACHARO={"0":"Delfín","00":"Ballena","01":"Carnero","02":"Toro","03":"Ciempiés","04":"Alacrán","05":"León","06":"Rana","07":"Perico","08":"Ratón","09":"Águila","10":"Tigre","11":"Gato","12":"Caballo","13":"Mono","14":"Paloma","15":"Zorro","16":"Oso","17":"Pavo","18":"Burro","19":"Chivo","20":"Cochino","21":"Gallo","22":"Camello","23":"Cebra","24":"Iguana","25":"Gallina","26":"Vaca","27":"Perro","28":"Zamuro","29":"Elefante","30":"Caimán","31":"Lapa","32":"Ardilla","33":"Pescado","34":"Venado","35":"Jirafa","36":"Culebra","37":"Tortuga","38":"Búfalo","39":"Lechuza","40":"Avispa","41":"Canguro","42":"Tucán","43":"Mariposa","44":"Chigüire","45":"Garza","46":"Puma","47":"Pavo Real","48":"Puercoespín","49":"Pereza","50":"Canario","51":"Pelícano","52":"Pulpo","53":"Caracol","54":"Grillo","55":"Oso Hormiguero","56":"Tiburón","57":"Pato","58":"Hormiga","59":"Pantera","60":"Camaleón","61":"Panda","62":"Cachicamo","63":"Cangrejo","64":"Gavilán","65":"Araña","66":"Lobo","67":"Avestruz","68":"Jaguar","69":"Conejo","70":"Bisonte","71":"Guacamaya","72":"Gorila","73":"Hipopótamo","74":"Turpial","75":"Guácharo"};
+const JALADERA={"0":["16","33","00"],"00":["0","30","24","33","27"],"01":["01","10"],"02":["08","26","22","27","34","12"],"03":["03","04","30","35"],"04":["32","33","12","25","36"],"05":["10","11","29","12","21","07"],"06":["36","24","27","34","12"],"07":["12","21","05","27","17","33","28"],"08":["11","29","05","15"],"09":["08","12","36","13","06"],"10":["23","32","01","19","34","13","29","18"],"11":["27","08","10","05"],"12":["07","14","23","05","21","33","18","02"],"13":["31","08","10","14","19"],"14":["06","18","35","12","24","28"],"15":["12","21","05","07","08","18"],"16":["16","31","12","04","34","11","19"],"17":["26","31","20","16","21","33","28","25"],"18":["14","10","07","27","06"],"19":["05","13","30","17","34","02","16"],"20":["08","26","31","17","36"],"21":["25","12","05","15"],"22":["29","19","01","23"],"23":["10","12","22"],"24":["24","36"],"25":["21","02","03","24","04","27","28"],"26":["02","06","08","12"],"27":["17","11","06","08","15","30"],"28":["14","25","17","07"],"29":["08","16","17"],"30":["24","03","25","21","12","06","14","36"],"31":["13","32","16","05"],"32":["04","20","21"],"33":["0","00","16","18","07","13","08"],"34":["16","18","10","02","19","30"],"35":["14","07","15"],"36":["36","24","19","08","15","33"]};
+let lottoData=[],granjitaData=[],guacharoData=[];
+let currentTopLotto=[],currentTopGranjita=[],currentTopGuacharo=[],currentFiltrados=[];
+document.getElementById('lottoFile').addEventListener('change',e=>readCSV(e.target.files[0],'lotto'));
+document.getElementById('granjitaFile').addEventListener('change',e=>readCSV(e.target.files[0],'granjita'));
+document.getElementById('guacharoFile').addEventListener('change',e=>readCSV(e.target.files[0],'guacharo'));
+function normalizarNumero(raw){raw=String(raw).trim();if(raw==='0'||raw==='00')return raw;if(/^\d+$/.test(raw))return raw.padStart(2,'0');return null}
+function readCSV(file,type){if(!file)return;const reader=new FileReader();reader.onload=(e)=>{const text=e.target.result.replace(/\r/g,'');const sep=(text.includes(';')&&!text.includes(','))?';':',';const lines=text.split('\n');const parsed=[];let descartadas=0;for(let i=1;i<lines.length;i++){const line=lines[i].trim();if(!line)continue;const parts=line.split(sep).map(p=>p.trim().replace(/^"|"$/g,''));if(parts.length<3){descartadas++;continue}const fecha=parts[0],hora=parts[1];const num=normalizarNumero(parts[2]);if(!fecha||!hora||num===null){descartadas++;continue}parsed.push({fecha,hora,numero:num})}console.log(`[${type}] leídas: ${parsed.length}, descartadas: ${descartadas}`);const statusEl=document.getElementById(type+'Status');statusEl.innerText=`✅ ${parsed.length} registros (descartadas: ${descartadas})`;statusEl.style.color='#3fb950';if(type==='lotto')lottoData=parsed;else if(type==='granjita')granjitaData=parsed;else guacharoData=parsed;if(lottoData.length&&granjitaData.length&&guacharoData.length){document.getElementById('analyzeBtn').disabled=false}};reader.readAsText(file)}
+function poblarSelectorAnimalActual(){const sel=document.getElementById('animalActual');sel.innerHTML='';const claves=["0","00",...Array.from({length:36},(_,i)=>String(i+1).padStart(2,'0'))];claves.forEach(k=>{const opt=document.createElement('option');opt.value=k;opt.textContent=`${k} - ${ANIMALES_BASE[k]}`;sel.appendChild(opt)})}
+document.getElementById('analyzeBtn').addEventListener('click',()=>{const mirrorDate=document.getElementById('mirrorDate').value;if(!mirrorDate){alert("Selecciona una fecha espejo");return}const freqLotto=getFrequencies(lottoData);const freqGranjita=getFrequencies(granjitaData);const freqGuacharo=getFrequencies(guacharoData);const mirrorLotto=getMirrorNumbers(lottoData,mirrorDate);const mirrorGranjita=getMirrorNumbers(granjitaData,mirrorDate);const mirrorGuacharo=getMirrorNumbers(guacharoData,mirrorDate);if(!mirrorLotto.length||!mirrorGranjita.length||!mirrorGuacharo.length){const err=document.getElementById('errorMsg');err.innerText="No hay datos para la fecha seleccionada en una o más loterías.";err.classList.remove('hidden');return}document.getElementById('errorMsg').classList.add('hidden');currentTopLotto=rankNumbers(mirrorLotto,freqLotto).slice(0,4);currentTopGranjita=rankNumbers(mirrorGranjita,freqGranjita).slice(0,4);currentTopGuacharo=rankNumbers(mirrorGuacharo,freqGuacharo).slice(0,4);const goldBase=currentTopLotto.filter(n=>currentTopGranjita.includes(n));const goldCruzado=goldBase.filter(n=>currentTopGuacharo.includes(n));renderTop(currentTopLotto,freqLotto,'lottoTop4',ANIMALES_BASE);renderTop(currentTopGranjita,freqGranjita,'granjitaTop4',ANIMALES_BASE);renderTop(currentTopGuacharo,freqGuacharo,'guacharoTop4',ANIMALES_GUACHARO);renderGold(goldBase,goldCruzado);document.getElementById('results').classList.remove('hidden');document.getElementById('jaladeraPanel').classList.remove('hidden');document.getElementById('filtroBox').classList.add('hidden');currentFiltrados=[]});
+document.getElementById('applyJaladeraBtn').addEventListener('click',()=>{const actual=document.getElementById('animalActual').value;const jala=JALADERA[actual]||[];const matchLotto=currentTopLotto.filter(n=>jala.includes(n));const matchGranjita=currentTopGranjita.filter(n=>jala.includes(n));const unidos=Array.from(new Set([...matchLotto,...matchGranjita]));currentFiltrados=unidos;const box=document.getElementById('filtroBox');const sub=document.getElementById('filtroSub');const chips=document.getElementById('filtroChips');chips.innerHTML='';if(!jala.length){sub.textContent=`No hay jaladera registrada para ${ANIMALES_BASE[actual]} (${actual}).`;box.classList.remove('hidden');return}sub.innerHTML=`Salió <b>${ANIMALES_BASE[actual]} (${actual})</b>. Jala: ${jala.map(n=>`${ANIMALES_BASE[n]||'?'} (${n})`).join(', ')}.`;if(unidos.length===0){const p=document.createElement('p');p.style.color='var(--red)';p.style.fontWeight='bold';p.textContent='❌ Ninguno de los que jala coincide con el Top 4 de Lotto/Granjita.';chips.appendChild(p)}else{unidos.forEach(n=>{const chip=document.createElement('span');const origen=[];if(matchLotto.includes(n))origen.push('Lotto');if(matchGranjita.includes(n))origen.push('Granjita');chip.className='chip match';chip.textContent=`${ANIMALES_BASE[n]} (${n}) — ${origen.join(' + ')}`;chips.appendChild(chip)})}box.classList.remove('hidden')});
+function getFrequencies(data){const freq={};data.forEach(row=>{freq[row.numero]=(freq[row.numero]||0)+1});return freq}
+function getMirrorNumbers(data,date){const nums=new Set();data.forEach(row=>{if(row.fecha===date)nums.add(row.numero)});return Array.from(nums)}
+function rankNumbers(arr,frequencies){return arr.sort((a,b)=>{const fa=frequencies[a]||0;const fb=frequencies[b]||0;if(fb!==fa)return fb-fa;return Number(b)-Number(a)})}
+function renderTop(numbers,frequencies,containerId,dict){const container=document.getElementById(containerId);container.innerHTML='';numbers.forEach(num=>{const div=document.createElement('div');div.style.marginBottom='15px';div.innerHTML=`<div class="top-num">${num}</div><div class="animal-name">${dict[num]||'Desconocido'}</div><div class="freq">Frecuencia: ${frequencies[num]} veces</div>`;container.appendChild(div)})}
+function renderGold(goldBase,goldCruzado){const container=document.getElementById('goldCandidates');container.innerHTML='';if(!goldBase.length){container.innerHTML='<p>No hubo coincidencias entre Lotto y Granjita.</p>';return}goldBase.forEach(num=>{const esCruzado=goldCruzado.includes(num);const div=document.createElement('div');div.style.background='var(--panel)';div.style.padding='15px';div.style.borderRadius='8px';div.style.minWidth='120px';div.style.border=`1px solid ${esCruzado?'var(--purple)':'var(--gold)'}`;div.innerHTML=`<div style="font-size:2rem;color:${esCruzado?'var(--purple)':'var(--gold)'};font-weight:bold;">${num}</div><div style="font-weight:bold;">${ANIMALES_BASE[num]||'Desconocido'}</div>${esCruzado?'<div style="font-size:.75rem;color:var(--purple);margin-top:4px;">🟣 Oro cruzado con Guácharo</div>':''}`;container.appendChild(div)})}
+document.getElementById('waBtn').addEventListener('click',()=>{const monto=document.getElementById('montoApuesta').value;const hora=document.getElementById('horaSorteo').value;let mensaje=`Sorteo de las ${hora},\n\n`;if(currentTopLotto.length){mensaje+="*Lotto Activo:*\n";currentTopLotto.forEach(num=>{mensaje+=`• ${ANIMALES_BASE[num]} (${num})\n`});mensaje+=`Monto: ${monto} c/u\n\n`}if(currentTopGranjita.length){mensaje+="*La Granjita:*\n";currentTopGranjita.forEach(num=>{mensaje+=`• ${ANIMALES_BASE[num]} (${num})\n`});mensaje+=`Monto: ${monto} c/u\n\n`}if(currentTopGuacharo.length){mensaje+="*Guácharo Activo:*\n";currentTopGuacharo.forEach(num=>{mensaje+=`• ${ANIMALES_GUACHARO[num]} (${num})\n`});mensaje+=`Monto: ${monto} c/u\n\n`}if(currentFiltrados.length){mensaje+="*🎯 Filtrados por Jaladera:*\n";currentFiltrados.forEach(num=>{mensaje+=`• ${ANIMALES_BASE[num]} (${num})\n`});mensaje+=`Monto: ${monto} c/u`}navigator.clipboard.writeText(mensaje.trim()).then(()=>{const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2500)}).catch(()=>{alert("Error al copiar. Aquí tienes el texto para copiar manualmente:\n\n"+mensaje)})});
+poblarSelectorAnimalActual();
 </script>
 </body>
 </html>
