@@ -155,7 +155,7 @@
 
         <div class="oro-box">
             <h2>✨ Candidatos Oro ✨</h2>
-            <p class="oro-sub" id="oroSub">Coincidencias en los Top 4 de Lotto y Granjita. Si además coinciden con Guácharo, se marcan como Oro cruzado.</p>
+            <p class="oro-sub">Coincidencias en los Top 4 de Lotto y Granjita. En morado: además coincide con el Top Guácharo.</p>
             <div id="goldCandidates" style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;"></div>
         </div>
 
@@ -167,7 +167,7 @@
 
 <script>
     // ===== Diccionarios =====
-    // Lotto / Granjita: "0"=Delfín, "00"=Ballena, "01".."36"
+    // Lotto / Granjita: "0" = Delfín, "00" = Ballena, "01".."36"
     const ANIMALES_BASE = {
         "0": "Delfín",
         "00": "Ballena",
@@ -181,7 +181,7 @@
         "35": "Jirafa", "36": "Culebra"
     };
 
-    // Guácharo: "0"=Delfín, "00"=Ballena, "01".."75"
+    // Guácharo: "0" = Delfín, "00" = Ballena, "01".."75"
     const ANIMALES_GUACHARO = {
         "0": "Delfín",
         "00": "Ballena",
@@ -214,36 +214,39 @@
     document.getElementById('granjitaFile').addEventListener('change', e => readCSV(e.target.files[0], 'granjita'));
     document.getElementById('guacharoFile').addEventListener('change', e => readCSV(e.target.files[0], 'guacharo'));
 
-    // Normaliza el número a string conservando "0" y "00"
+    // Normaliza el número: "0" -> "0", "00" -> "00", "5" -> "05"
     function normalizarNumero(raw) {
-        const s = String(raw).trim();
-        if (s === "0" || s === "00") return s;
-        if (/^\d+$/.test(s)) return s.padStart(2, '0');
-        return "0";
+        raw = String(raw).trim();
+        if (raw === '0' || raw === '00') return raw;
+        if (/^\d+$/.test(raw)) return raw.padStart(2, '0');
+        return null;
     }
 
     function readCSV(file, type) {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-            const lines = e.target.result.split('\n');
+            const text = e.target.result.replace(/\r/g, '');
+            const sep = (text.includes(';') && !text.includes(',')) ? ';' : ',';
+            const lines = text.split('\n');
             const parsed = [];
+            let descartadas = 0;
 
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
-                if (!line) continue;
-                const parts = line.split(',');
-                if (parts.length >= 3) {
-                    parsed.push({
-                        fecha: parts[0].trim(),
-                        hora: parts[1].trim(),
-                        numero: normalizarNumero(parts[2])
-                    });
-                }
+                if (!line) continue; // vacía: no cuenta como descartada
+                const parts = line.split(sep).map(p => p.trim().replace(/^"|"$/g, ''));
+                if (parts.length < 3) { descartadas++; continue; }
+                const fecha = parts[0], hora = parts[1];
+                const num = normalizarNumero(parts[2]);
+                if (!fecha || !hora || num === null) { descartadas++; continue; }
+                parsed.push({ fecha, hora, numero: num });
             }
 
+            console.log(`[${type}] leídas: ${parsed.length}, descartadas: ${descartadas}, total líneas: ${lines.length}`);
+
             const statusEl = document.getElementById(type + 'Status');
-            statusEl.innerText = `✅ ${parsed.length} registros`;
+            statusEl.innerText = `✅ ${parsed.length} registros (descartadas: ${descartadas})`;
             statusEl.style.color = '#3fb950';
 
             if (type === 'lotto') lottoData = parsed;
@@ -281,9 +284,9 @@
         currentTopGranjita = rankNumbers(mirrorGranjita, freqGranjita).slice(0, 4);
         currentTopGuacharo = rankNumbers(mirrorGuacharo, freqGuacharo).slice(0, 4);
 
-        // Oro: intersección Lotto ∩ Granjita
+        // Oro base: intersección Lotto ∩ Granjita
         const goldBase = currentTopLotto.filter(n => currentTopGranjita.includes(n));
-        // Oro cruzado: además presente en Top Guácharo
+        // Oro cruzado: además aparece en Top Guácharo
         const goldCruzado = goldBase.filter(n => currentTopGuacharo.includes(n));
 
         renderTop(currentTopLotto, freqLotto, 'lottoTop4', ANIMALES_BASE);
@@ -311,8 +314,7 @@
             const fa = frequencies[a] || 0;
             const fb = frequencies[b] || 0;
             if (fb !== fa) return fb - fa;
-            // Desempate numérico descendente (para "0" y "00" usa Number → 0, pero conserva orden)
-            return Number(b) - Number(a);
+            return Number(b) - Number(a); // desempate numérico
         });
     }
 
@@ -347,13 +349,11 @@
             div.style.padding = '15px';
             div.style.borderRadius = '8px';
             div.style.minWidth = '120px';
-            div.style.border = `1px solid ${esCruzado ? '#a371f7' : 'var(--gold)'}`;
+            div.style.border = `1px solid ${esCruzado ? 'var(--purple)' : 'var(--gold)'}`;
             div.innerHTML = `
-                <div style="font-size: 2rem; color: ${esCruzado ? '#a371f7' : 'var(--gold)'}; font-weight:bold;">
-                    ${num}
-                </div>
+                <div style="font-size: 2rem; color: ${esCruzado ? 'var(--purple)' : 'var(--gold)'}; font-weight:bold;">${num}</div>
                 <div style="font-weight: bold;">${ANIMALES_BASE[num] || 'Desconocido'}</div>
-                ${esCruzado ? '<div style="font-size:0.75rem; color:#a371f7; margin-top:4px;">🟣 Oro cruzado con Guácharo</div>' : ''}
+                ${esCruzado ? '<div style="font-size:0.75rem; color:var(--purple); margin-top:4px;">🟣 Oro cruzado con Guácharo</div>' : ''}
             `;
             container.appendChild(div);
         });
