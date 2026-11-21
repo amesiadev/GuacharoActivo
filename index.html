@@ -34,18 +34,21 @@
         .btn:disabled { background: #555; cursor: not-allowed; }
         .btn-whatsapp { background: #25D366; color: white; margin-top: 15px; }
         
-        .date-inputs {
-            display: flex; gap: 10px; margin-top: 20px;
+        .settings-group {
+            display: flex; gap: 15px; margin-top: 20px;
             justify-content: center; align-items: center; flex-wrap: wrap;
+            background: rgba(88, 166, 255, 0.05); padding: 15px; border-radius: 8px;
+            border: 1px solid var(--border);
         }
-        .money-inputs {
-            display: flex; gap: 10px; margin-top: 15px;
-            justify-content: center; align-items: center; flex-wrap: wrap;
-            background: rgba(88, 166, 255, 0.1); padding: 10px; border-radius: 8px;
+        .setting-item {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
         }
-        input[type="date"], input[type="number"] {
+        .setting-item label { font-size: 0.85rem; color: #8b949e; font-weight: bold; }
+        
+        input[type="date"], input[type="number"], select {
             padding: 8px; border-radius: 5px; border: 1px solid var(--border);
             background: var(--bg); color: var(--text); font-size: 16px;
+            font-family: inherit;
         }
         input[type="number"] { width: 80px; }
         
@@ -97,14 +100,32 @@
             </div>
         </div>
 
-        <div class="date-inputs">
-            <label>Fecha Espejo:</label>
-            <input type="date" id="mirrorDate" value="2026-10-20">
-        </div>
-        
-        <div class="money-inputs">
-            <label>Monto por animalito:</label>
-            <input type="number" id="montoApuesta" value="1.5" step="0.1" min="0.1">
+        <div class="settings-group">
+            <div class="setting-item">
+                <label>Fecha Espejo</label>
+                <input type="date" id="mirrorDate" value="2026-10-20">
+            </div>
+            <div class="setting-item">
+                <label>Monto por animalito</label>
+                <input type="number" id="montoApuesta" value="1.5" step="0.1" min="0.1">
+            </div>
+            <div class="setting-item">
+                <label>Sorteo</label>
+                <select id="horaSorteo">
+                    <option value="8 AM">8 AM</option>
+                    <option value="9 AM">9 AM</option>
+                    <option value="10 AM">10 AM</option>
+                    <option value="11 AM">11 AM</option>
+                    <option value="12 PM">12 PM</option>
+                    <option value="1 PM">1 PM</option>
+                    <option value="2 PM">2 PM</option>
+                    <option value="3 PM">3 PM</option>
+                    <option value="4 PM">4 PM</option>
+                    <option value="5 PM">5 PM</option>
+                    <option value="6 PM">6 PM</option>
+                    <option value="7 PM">7 PM</option>
+                </select>
+            </div>
         </div>
 
         <button class="btn" id="analyzeBtn" disabled>Analizar y Generar Top 4</button>
@@ -286,25 +307,25 @@
     // Lógica para generar el mensaje de WhatsApp
     document.getElementById('waBtn').addEventListener('click', () => {
         const monto = document.getElementById('montoApuesta').value;
-        let mensaje = "Buenas, para hoy quiero jugar estos animalitos:\n\n";
+        const hora = document.getElementById('horaSorteo').value;
+        
+        let mensaje = `Sorteo de las ${hora},\n\n`;
 
         if (currentTopLotto.length > 0) {
-            mensaje += "🎰 *Lotto Activo:*\n";
+            mensaje += "*Lotto Activo:*\n";
             currentTopLotto.forEach(num => {
                 mensaje += `• ${ANIMALES[num]} (${num.toString().padStart(2, '0')})\n`;
             });
-            mensaje += `\nMonto: ${monto} cada uno.\n\n`;
+            mensaje += `Monto: ${monto} c/u\n\n`;
         }
 
         if (currentTopGranjita.length > 0) {
-            mensaje += "🌾 *La Granjita:*\n";
+            mensaje += "*La Granjita:*\n";
             currentTopGranjita.forEach(num => {
                 mensaje += `• ${ANIMALES[num]} (${num.toString().padStart(2, '0')})\n`;
             });
-            mensaje += `\nMonto: ${monto} cada uno.\n\n`;
+            mensaje += `Monto: ${monto} c/u`;
         }
-
-        mensaje += "¡Gracias!";
 
         // Copiar al portapapeles
         navigator.clipboard.writeText(mensaje).then(() => {
@@ -317,4 +338,4 @@
     });
 </script>
 </body>
-</html>
+    </html>
